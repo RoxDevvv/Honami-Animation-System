@@ -1,0 +1,398 @@
+using UnityEngine;
+using UnityEditor;
+using System.Collections.Generic;
+using HonamiAnimationSystem.Runtime.Core;
+
+namespace HonamiAnimationSystem.Editor
+{
+    public sealed class HonamiValidatorWindow : EditorWindow
+    {
+        private HonamiController _controller;
+        private Vector2 _scrollPos;
+        private List<string> _logMessages = new List<string>();
+
+        [MenuItem("Window/Honami/Honami Controller Validator")]
+        public static void ShowWindow()
+        {
+            var w = GetWindow<HonamiValidatorWindow>("Honami Controller Validator");
+            w.minSize = new Vector2(400, 300);
+        }
+
+        private void OnGUI()
+        {
+            GUILayout.Label("Honami Controller Validator", EditorStyles.boldLabel);
+            EditorGUILayout.Space();
+
+            GUI.backgroundColor = new Color(0.8f, 0.4f, 0.4f);
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("Scan ALL in Project", GUILayout.Height(30)))
+            {
+                ProcessAllControllers(true);
+            }
+            if (GUILayout.Button("Fix ALL in Project", GUILayout.Height(30)))
+            {
+                if (EditorUtility.DisplayDialog("Fix All Controllers",
+                    "Are you sure you want to validate and fix ALL Honami Controllers in the project? This might take a moment.",
+                    "Yes, Fix All", "Cancel"))
+                {
+                    ProcessAllControllers(false);
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+            GUI.backgroundColor = Color.white;
+
+            EditorGUILayout.Space();
+
+            _controller = (HonamiController)EditorGUILayout.ObjectField("Select Controller:", _controller, typeof(HonamiController), false);
+
+            if (_controller == null)
+            {
+                EditorGUILayout.HelpBox("Select a Honami Controller to scan or fix a specific one.", MessageType.Info);
+            }
+            else
+            {
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("Scan Selected", GUILayout.Height(30)))
+                {
+                    ScanSelected();
+                }
+                if (GUILayout.Button("Fix Selected", GUILayout.Height(30)))
+                {
+                    ValidateAndFix();
+                }
+                EditorGUILayout.EndHorizontal();
+            }
+
+            EditorGUILayout.Space();
+            GUILayout.Label("Log:", EditorStyles.boldLabel);
+
+            _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos, "box");
+            if (_logMessages.Count == 0)
+            {
+                EditorGUILayout.LabelField("No logs yet. Click a 'Scan' or 'Fix' button to run.", EditorStyles.wordWrappedLabel);
+            }
+            else
+            {
+                foreach (var msg in _logMessages)
+                {
+                    EditorGUILayout.SelectableLabel(msg, EditorStyles.wordWrappedLabel, GUILayout.Height(18));
+                }
+            }
+            EditorGUILayout.EndScrollView();
+        }
+
+        private void Log(string message)
+        {
+            _logMessages.Add(message);
+        }
+
+        private void ScanSelected()
+        {
+            if (_controller == null) return;
+            _logMessages.Clear();
+            Log($"Scanning controller: '{_controller.name}'...");
+            ValidateController(_controller, true);
+        }
+
+        private void ValidateAndFix()
+        {
+            if (_controller == null) return;
+
+            _logMessages.Clear();
+            Log($"Starting validation and fix for controller: '{_controller.name}'...");
+
+            bool dirty = ValidateController(_controller, false);
+
+            if (dirty)
+            {
+                AssetDatabase.SaveAssets();
+                Log("\nDone. Fixes were applied and saved successfully.");
+                Debug.Log($"[Honami Validator] Validated controller '{_controller.name}', applied and saved fixes.");
+            }
+            else
+            {
+                Log("\nDone. Controller is valid! No fixes were needed.");
+            }
+        }
+
+        private void ProcessAllControllers(bool dryRun)
+        {
+            _logMessages.Clear();
+            Log(dryRun ? "Scanning all HonamiControllers in project..." : "Fixing all HonamiControllers in project...");
+
+            string[] guids = AssetDatabase.FindAssets("t:HonamiController");
+            int count = 0;
+            int issueCount = 0;
+
+            foreach (string guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                var ctrl = AssetDatabase.LoadAssetAtPath<HonamiController>(path);
+                if (ctrl != null)
+                {
+                    count++;
+                    Log($"\n--- Checking: {ctrl.name} ---");
+                    bool hasIssues = ValidateController(ctrl, dryRun);
+                    if (hasIssues)
+                    {
+                        issueCount++;
+                    }
+                }
+            }
+
+            if (!dryRun && issueCount > 0)
+            {
+                AssetDatabase.SaveAssets();
+            }
+
+            string action = dryRun ? "had issues" : "were fixed";
+            if (issueCount > 0)
+            {
+                Log($"\n[Summary] Checked {count} controllers. {issueCount} controllers {action}.");
+            }
+            else
+            {
+                Log($"\n[Summary] Checked {count} controllers. All valid, no issues found.");
+            }
+        }
+
+        private bool ValidateController(HonamiController ctrl, bool dryRun)
+        {
+            bool hasIssues = false;
+
+            if (!dryRun)
+            {
+                Undo.RecordObject(ctrl, "Fix Controller Validation");
+            }
+
+            if (ctrl.states == null)
+            {
+                if (dryRun) Log($"[{ctrl.name}] [Issue] States list is null.");
+                else
+                {
+                    ctrl.states = new List<HonamiState>();
+                    Log($"[{ctrl.name}] [Fix] Initialized states list.");
+                }
+                hasIssues = true;
+            }
+
+            // 1. Check for null states
+            int nullCount = 0;
+            if (ctrl.states != null)
+            {
+                for (int i = 0; i < ctrl.states.Count; i++)
+                {
+                    if (ctrl.states[i] == null) nullCount++;
+                }
+            }
+
+            if (nullCount > 0)
+            {
+                if (dryRun) Log($"[{ctrl.name}] [Issue] Found {nullCount} null states in controller.");
+                else
+                {
+                    ctrl.states.RemoveAll(s => s == null);
+                    Log($"[{ctrl.name}] [Fix] Removed {nullCount} null states.");
+                }
+                hasIssues = true;
+            }
+
+            // 2. Check for Name Hash collisions
+            var nameHashes = new HashSet<int>();
+            if (ctrl.states != null)
+            {
+                foreach (var state in ctrl.states)
+                {
+                    if (state == null) continue;
+
+                    int hash = state.stateName.GetHashCode();
+                    if (!nameHashes.Add(hash))
+                    {
+                        if (dryRun)
+                        {
+                            Log($"[{ctrl.name}] [Issue] Name Hash collision detected for state '{state.stateName}'.");
+                        }
+                        else
+                        {
+                            Undo.RecordObject(state, "Rename State (Hash Collision)");
+                            string oldName = state.stateName;
+                            int suffix = 1;
+
+                            while (nameHashes.Contains((state.stateName + " " + suffix).GetHashCode()))
+                            {
+                                suffix++;
+                            }
+
+                            state.stateName = state.stateName + " " + suffix;
+                            nameHashes.Add(state.stateName.GetHashCode());
+                            EditorUtility.SetDirty(state);
+                            Log($"[{ctrl.name}] [Fix] Fixed Name Hash collision: Renamed '{oldName}' to '{state.stateName}'.");
+                        }
+                        hasIssues = true;
+                    }
+                }
+            }
+
+            // 3. Check for empty GUIDs or GUID collisions
+            var guids = new HashSet<string>();
+            if (ctrl.states != null)
+            {
+                foreach (var state in ctrl.states)
+                {
+                    if (state == null) continue;
+
+                    if (string.IsNullOrEmpty(state.guid))
+                    {
+                        if (dryRun) Log($"[{ctrl.name}] [Issue] State '{state.stateName}' has empty/missing GUID.");
+                        else
+                        {
+                            Undo.RecordObject(state, "Generate missing GUID");
+                            state.guid = System.Guid.NewGuid().ToString();
+                            guids.Add(state.guid);
+                            EditorUtility.SetDirty(state);
+                            Log($"[{ctrl.name}] [Fix] Generated missing GUID for state '{state.stateName}'.");
+                        }
+                        hasIssues = true;
+                    }
+                    else if (!guids.Add(state.guid))
+                    {
+                        if (dryRun) Log($"[{ctrl.name}] [Issue] GUID collision detected for state '{state.stateName}'.");
+                        else
+                        {
+                            Undo.RecordObject(state, "Fix GUID Collision");
+                            state.guid = System.Guid.NewGuid().ToString();
+                            guids.Add(state.guid);
+                            EditorUtility.SetDirty(state);
+                            Log($"[{ctrl.name}] [Fix] Fixed GUID collision for state '{state.stateName}'.");
+                        }
+                        hasIssues = true;
+                    }
+                }
+            }
+
+            // 4. Check for invalid layer indices
+            int layerCount = ctrl.layers.Count;
+            if (layerCount == 0)
+            {
+                if (dryRun) Log($"[{ctrl.name}] [Issue] Controller has 0 layers.");
+                else
+                {
+                    ctrl.layers.Add(new HonamiLayer() { name = "Base Layer" });
+                    layerCount = 1;
+                    Log($"[{ctrl.name}] [Fix] Created missing Base Layer.");
+                }
+                hasIssues = true;
+            }
+
+            if (ctrl.states != null)
+            {
+                foreach (var state in ctrl.states)
+                {
+                    if (state == null) continue;
+
+                    if (state.layerIndex < 0 || state.layerIndex >= layerCount)
+                    {
+                        if (dryRun) Log($"[{ctrl.name}] [Issue] Invalid layer index {state.layerIndex} on state '{state.stateName}'.");
+                        else
+                        {
+                            Undo.RecordObject(state, "Fix State Layer Index");
+                            Log($"[{ctrl.name}] [Fix] Fixed invalid layer index {state.layerIndex} on state '{state.stateName}'. Resetting to 0.");
+                            state.layerIndex = 0;
+                            EditorUtility.SetDirty(state);
+                        }
+                        hasIssues = true;
+                    }
+
+                    // 5. Check for null node inside state
+                    if (state.node == null)
+                    {
+                        if (dryRun) Log($"[{ctrl.name}] [Issue] State '{state.stateName}' has no behavior node.");
+                        else
+                        {
+                            Undo.RecordObject(state, "Create missing Node");
+                            state.node = ScriptableObject.CreateInstance<HonamiAnimationNode>();
+                            state.node.name = state.stateName + "_Node";
+                            if (AssetDatabase.Contains(ctrl))
+                            {
+                                AssetDatabase.AddObjectToAsset(state.node, ctrl);
+                            }
+                            EditorUtility.SetDirty(state);
+                            Log($"[{ctrl.name}] [Fix] Created default HonamiAnimationNode for state '{state.stateName}'.");
+                        }
+                        hasIssues = true;
+                    }
+
+                    // 6. Check for null or dangling transitions
+                    if (state.transitions != null)
+                    {
+                        int nullTrans = 0;
+                        foreach (var t in state.transitions) { if (t == null) nullTrans++; }
+
+                        if (nullTrans > 0)
+                        {
+                            if (dryRun) Log($"[{ctrl.name}] [Issue] State '{state.stateName}' contains {nullTrans} null transitions.");
+                            else
+                            {
+                                Undo.RecordObject(state, "Remove null transitions");
+                                state.transitions.RemoveAll(t => t == null);
+                                EditorUtility.SetDirty(state);
+                                Log($"[{ctrl.name}] [Fix] Removed {nullTrans} null transitions from '{state.stateName}'.");
+                            }
+                            hasIssues = true;
+                        }
+
+                        // Dangling transitions check (targetStateGuid not in guids)
+                        for (int i = state.transitions.Count - 1; i >= 0; i--)
+                        {
+                            var t = state.transitions[i];
+                            if (t != null && !string.IsNullOrEmpty(t.targetStateGuid) && !guids.Contains(t.targetStateGuid))
+                            {
+                                if (dryRun) Log($"[{ctrl.name}] [Issue] State '{state.stateName}' has a dangling transition (target GUID points nowhere).");
+                                else
+                                {
+                                    Undo.RecordObject(state, "Remove dangling transition");
+                                    state.transitions.RemoveAt(i);
+                                    EditorUtility.SetDirty(state);
+                                    Log($"[{ctrl.name}] [Fix] Removed dangling transition from '{state.stateName}'.");
+                                }
+                                hasIssues = true;
+                            }
+                        }
+                    }
+
+                    // 7. Check for null subNodes
+                    if (state.subNodes != null)
+                    {
+                        int nullSubNodes = 0;
+                        foreach (var sn in state.subNodes) { if (sn == null) nullSubNodes++; }
+
+                        if (nullSubNodes > 0)
+                        {
+                            if (dryRun) Log($"[{ctrl.name}] [Issue] State '{state.stateName}' contains {nullSubNodes} null sub-nodes.");
+                            else
+                            {
+                                Undo.RecordObject(state, "Remove null sub-nodes");
+                                state.subNodes.RemoveAll(sn => sn == null);
+                                EditorUtility.SetDirty(state);
+                                Log($"[{ctrl.name}] [Fix] Removed {nullSubNodes} null sub-nodes from '{state.stateName}'.");
+                            }
+                            hasIssues = true;
+                        }
+                    }
+                }
+            }
+
+            if (!dryRun && hasIssues)
+            {
+                EditorUtility.SetDirty(ctrl);
+            }
+
+            if (dryRun && !hasIssues)
+            {
+                Log("No issues found in this controller.");
+            }
+
+            return hasIssues;
+        }
+    }
+}

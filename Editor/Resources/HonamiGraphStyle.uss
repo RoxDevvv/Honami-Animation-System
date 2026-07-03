@@ -1,0 +1,696 @@
+GridBackground {
+    --grid-background-color: #121418;
+    --line-color: rgba(255, 255, 255, 0.03);
+    --thick-line-color: rgba(255, 255, 255, 0.08);
+    --spacing: 30;
+}
+
+HonamiNode {
+    margin: 0;
+    padding: 0;
+}
+
+HonamiNode #node-border {
+    background-color: #242629;
+    border-radius: 14px;
+    border-width: 1px;
+    border-color: #1a1a1a;
+
+    min-width: 160px;
+    overflow: hidden;
+
+    transition-property: background-color, border-color, border-width, border-bottom-width, translate, scale;
+    transition-duration: 0.25s;
+    transition-timing-function: ease-out-back;
+}
+
+.honami-tactile-3d HonamiNode #node-border {
+    border-bottom-width: 4px;
+}
+
+.honami-node-portal-entrance #node-border, 
+.honami-node-portal-exit #node-border {
+    min-width: 120px;
+    background-color: #1e2023;
+}
+
+.honami-animated HonamiNode #node-border {
+    transition-property: background-color, border-color, border-width, scale, translate;
+}
+
+HonamiNode:hover #node-border {
+    background-color: #2d3035;
+    border-color: #4b4d52;
+}
+
+.honami-animated HonamiNode:hover #node-border {
+    scale: 1.01;
+}
+
+.honami-animated.honami-tactile-3d HonamiNode:hover #node-border {
+    translate: 0 -2px;
+    border-bottom-width: 6px;
+    scale: 1.01;
+}
+
+HonamiNode:selected #node-border {
+    border-color: #ff4785; 
+    border-width: 2px;
+    background-color: #2a2d32;
+}
+
+.honami-tactile-3d HonamiNode:selected #node-border {
+    border-bottom-width: 5px;
+}
+
+.honami-animated HonamiNode:selected #node-border {
+    scale: 1.02;
+}
+
+.honami-animated.honami-tactile-3d HonamiNode:selected #node-border {
+    translate: 0 -1px;
+    scale: 1.02;
+}
+
+/* Remove internal padding from GraphView Node default layout */
+HonamiNode #contents {
+    padding: 0;
+    margin: 0;
+}
+
+/* Hide default Unity selection border to prevent double-border artifacts */
+HonamiNode #selection-border {
+    display: none;
+}
+
+.honami-node-top {
+    height: 6px;
+    width: 100%;
+}
+
+.honami-node-top-any { background-color: #2bc4b6; }
+.honami-node-top-repeater { background-color: #a14df5; }
+.honami-node-top-exit { background-color: #f14c4c; }
+.honami-node-top-blend { background-color: #888888; }
+.honami-node-top-random { background-color: #ff4785; }
+.honami-node-top-sequencer { background-color: #6366f1; }
+.honami-node-top-animation { background-color: #8dbb5b; }
+.honami-node-top-portal-entrance { background-color: #3b82f6; }
+.honami-node-top-portal-exit { background-color: #ec4899; }
+.honami-node-top-default { background-color: #e57519; }
+
+.honami-node-body {
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 14px;
+    background-color: transparent;
+}
+
+.honami-node-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    margin-right: 12px;
+    align-items: center;
+    justify-content: center;
+    background-color: #16171a;
+    border-width: 1.5px;
+
+    transition-property: border-color, background-color, scale, rotate;
+    transition-duration: 0.25s;
+    transition-timing-function: ease-out-back;
+}
+
+.honami-animated .honami-node-avatar {
+    transition-property: scale, rotate, border-color, background-color;
+}
+
+.honami-node-avatar-any { border-color: rgba(43, 196, 182, 0.7); border-radius: 10px; rotate: 30deg; }
+.honami-node-avatar-repeater { border-color: rgba(161, 77, 245, 0.7); border-radius: 16px; scale: 0.85 1.1; }
+.honami-node-avatar-exit { border-color: rgba(241, 76, 76, 0.7); border-radius: 0; rotate: 45deg; scale: 0.9; }
+.honami-node-avatar-blend { border-color: rgba(136, 136, 136, 0.7); border-radius: 4px; rotate: 45deg; }
+.honami-node-avatar-random { border-color: rgba(255, 71, 133, 0.7); border-radius: 18px 6px 14px 10px; }
+.honami-node-avatar-sequencer { border-color: rgba(99, 102, 241, 0.7); border-radius: 4px; }
+.honami-node-avatar-animation { border-color: rgba(141, 187, 91, 0.7); border-radius: 16px; }
+.honami-node-avatar-portal-entrance { border-color: #3b82f6; border-radius: 16px 4px 4px 16px; background-color: rgba(59, 130, 246, 0.1); }
+.honami-node-avatar-portal-exit { border-color: #ec4899; border-radius: 4px 16px 16px 4px; background-color: rgba(236, 72, 153, 0.1); }
+.honami-node-avatar-default { border-color: rgba(229, 117, 25, 0.7); }
+
+.honami-node-icon {
+    width: 14px;
+    height: 14px;
+    background-color: transparent;
+    border-radius: 7px;
+
+    transition-property: background-color;
+    transition-duration: 0.3s;
+}
+
+.honami-animated .honami-node-icon {
+    transition-property: scale, rotate, background-color;
+}
+
+.honami-node-icon-any { background-color: #2bc4b6; border-radius: 4px; rotate: -30deg; }
+.honami-node-icon-repeater { background-color: #a14df5; border-radius: 7px; width: 8px; height: 16px; }
+.honami-node-icon-exit { background-color: #f14c4c; border-radius: 0; width: 14px; height: 4px; }
+.honami-node-icon-blend { background-color: #888888; border-radius: 1px; width: 10px; height: 10px; }
+.honami-node-icon-random { background-color: #ff4785; border-radius: 10px 4px 8px 3px; }
+.honami-node-icon-sequencer { background-color: #6366f1; border-radius: 2px; }
+.honami-node-icon-animation { background-color: #8dbb5b; border-radius: 7px; }
+.honami-node-icon-portal-entrance { background-color: #3b82f6; border-radius: 2px; rotate: 45deg; width: 10px; height: 10px; }
+.honami-node-icon-portal-exit { background-color: #ec4899; border-radius: 10px; width: 10px; height: 10px; }
+.honami-node-icon-default { background-color: #e57519; }
+
+.honami-node-label {
+    color: #e8e8e8;
+    font-size: 15px;
+    -unity-font-style: bold;
+    margin: 0;
+    padding: 0;
+    flex-grow: 1;
+}
+
+.honami-node-subtitle {
+     color: #7b8085;
+     font-size: 11px;
+     margin-top: 2px;
+}
+
+.honami-node-text-container {
+    flex-direction: column;
+    justify-content: center;
+}
+
+.honami-animated .honami-node-text-container {
+    transition-property: translate;
+    transition-duration: 0.2s;
+}
+
+HonamiNode:hover .honami-node-avatar {
+    /* No scale/rotate here by default */
+}
+
+.honami-animated HonamiNode:hover .honami-node-avatar {
+    scale: 1.1;
+    rotate: 5deg;
+}
+
+HonamiNode:hover .honami-node-icon {
+    /* No scale here by default */
+}
+
+.honami-animated HonamiNode:hover .honami-node-icon {
+    scale: 1.2;
+}
+
+HonamiNode:hover .honami-node-text-container {
+    /* No translate here by default */
+}
+
+.honami-animated HonamiNode:hover .honami-node-text-container {
+    translate: 2px 0;
+}
+
+/* ---------------- Overridden State Visuals ---------------- */
+.honami-node-overridden #node-border {
+    border-color: #e67e22; /* Orange-ish */
+    border-width: 2px;
+    background-color: #2d241c;
+}
+
+.honami-node-overridden:hover #node-border {
+    border-color: #f39c12;
+    background-color: #36291e;
+}
+
+.honami-node-overridden:selected #node-border {
+    border-color: #f1c40f;
+    border-width: 3px;
+    background-color: #403020;
+}
+
+/* ---------------- Inherited State Visuals ---------------- */
+.honami-node-inherited #node-border {
+    border-color: #5f7fa8;
+    border-width: 1px;
+    background-color: #202734;
+}
+
+.honami-node-inherited:hover #node-border {
+    border-color: #7da6d8;
+    background-color: #253044;
+}
+
+.honami-node-inherited:selected #node-border {
+    border-color: #8ab8ee;
+    border-width: 2px;
+    background-color: #2a3950;
+}
+
+/* ---------------- Default State Visuals ---------------- */
+.honami-node-default #node-border {
+    border-color: #e57519;
+    background-color: #2a2622; /* Slightly warmer dark background */
+}
+
+.honami-node-default:hover #node-border {
+    border-color: #ff8c30;
+    background-color: #322c27;
+}
+
+/* Selection priority over default border */
+.honami-node-default:selected #node-border {
+    border-color: #ff4785;
+}
+
+/* ---------------- Mini Map ---------------- */
+.honami-minimap {
+    background-color: rgba(36, 38, 41, 0.85);
+    border-color: #1a1a1a;
+    border-width: 1px;
+    border-radius: 12px;
+
+    transition-property: opacity;
+    transition-duration: 0.3s;
+}
+
+.honami-minimap Label {
+    color: #e8e8e8;
+    -unity-font-style: bold;
+    font-size: 13px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    -unity-text-align: middle-center;
+}
+
+.honami-minimap #viewport {
+    background-color: rgba(255, 71, 133, 0.16);
+    border-color: #ff4785;
+    border-width: 2px;
+    border-radius: 4px;
+}
+
+/* ---------------- Group ---------------- */
+Group {
+    background-color: rgba(32, 32, 32, 0.4);
+    border-color: rgba(0, 0, 0, 0.3);
+    border-width: 1px;
+    border-radius: 12px;
+
+    transition-property: background-color, border-color, border-width, scale;
+    transition-duration: 0.25s;
+    transition-timing-function: ease-out-back;
+}
+
+Group:selected {
+    border-color: #ff4785;
+    border-width: 2px;
+    background-color: rgba(255, 71, 133, 0.06);
+    scale: 1.01;
+}
+
+Group > .mainContainer > #header {
+    background-color: rgba(45, 45, 45, 0.85);
+    border-top-left-radius: 11px;
+    border-top-right-radius: 11px;
+    padding: 2px;
+    
+    transition-property: background-color;
+    transition-duration: 0.2s;
+}
+
+Group > .mainContainer > #header:hover {
+    background-color: rgba(55, 55, 55, 0.95);
+}
+
+Group > .mainContainer > #header > #label {
+    color: #e8e8e8;
+    font-size: 15px;
+    -unity-font-style: bold;
+    padding: 6px 12px;
+}
+
+Group > .mainContainer > #header > #titleField {
+    color: #e8e8e8;
+    font-size: 15px;
+    -unity-font-style: bold;
+    padding: 6px 12px;
+}
+
+Group > .mainContainer > #centralContainer > #contentContainer {
+    padding: 10px;
+}
+
+/* ---------------- Transition Edge Badge ---------------- */
+.honami-transition-badge {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
+    background-color: #242629;
+    border-color: #1a1a1a;
+    border-width: 2px;
+    align-items: center;
+    justify-content: center;
+    transform-origin: center;
+
+    transition-property: background-color, border-color;
+    transition-duration: 0.15s;
+}
+
+.honami-animated .honami-transition-badge {
+    transition-property: background-color, border-color, scale, rotate;
+}
+
+.honami-transition-badge-hover {
+    background-color: #2b2e32;
+    border-color: #3b3d42;
+}
+
+.honami-animated .honami-transition-badge-hover {
+    scale: 1.15;
+}
+
+.honami-transition-badge-selected {
+    background-color: #2b2e32;
+    border-color: #ff4785;
+}
+
+.honami-animated .honami-transition-badge-selected {
+    scale: 1.2;
+}
+
+.honami-transition-badge-preview {
+    border-color: #ff4785;
+}
+
+.honami-transition-icon {
+    color: #e8e8e8;
+    font-size: 10px;
+    margin-left: 2px;
+    margin-top: -1px;
+    -unity-font-style: bold;
+}
+
+.honami-transition-badge.honami-transition-badge-self {
+    border-color: #2bc4b6;
+}
+
+.honami-transition-badge.honami-transition-badge-self > .honami-transition-icon {
+    color: #2bc4b6;
+}
+
+.honami-transition-badge-selected.honami-transition-badge-self {
+    border-color: #ff4785;
+    background-color: #1e3a3f;
+}
+
+/* ---------------- Blend Tree Visualizer ---------------- */
+.honami-bt-visualizer-container {
+    height: 220px;
+    background-color: #1a1b1e;
+    border-top-width: 1px;
+    border-top-color: #000000;
+    padding: 0;
+    overflow: hidden;
+}
+
+.honami-bt-visualizer-header {
+    flex-direction: row;
+    height: 38px;
+    background-color: #242629;
+    align-items: center;
+    border-bottom-width: 1px;
+    border-bottom-color: #111111;
+    padding: 0 15px;
+}
+
+.honami-bt-visualizer-title {
+    -unity-font-style: bold;
+    color: #ff4785;
+    font-size: 11px;
+    opacity: 0.9;
+}
+
+.honami-bt-preview-slider {
+    width: 200px;
+    margin-left: 10px;
+}
+
+/* Fix slider overlap by removing internal label and adjusting width/margins */
+.honami-bt-preview-slider .unity-base-field__label {
+    display: none;
+}
+
+.honami-bt-weight-visualizer {
+    flex-grow: 1;
+    margin: 15px;
+    background-color: #141518;
+    border-width: 1px;
+    border-color: #1f1f22;
+    border-radius: 8px;
+}
+
+.honami-bt-preview-label {
+    color: #888888;
+    font-size: 10px;
+    -unity-font-style: bold;
+    margin-left: 20px;
+}
+
+/* Motion Node Progress Bar highlights */
+.honami-bt-weight-progress-bar {
+    background-color: #8dbb5b; /* Animation green */
+    border-radius: 6px;
+}
+
+/* ---------------- Global Settings ---------------- */
+/* When .honami-animated is NOT present, UI stays perfectly static */
+
+/* ---------------- Play Mode Debug Visuals ---------------- */
+.honami-node-active #node-border {
+    border-color: #8dbb5b; /* Animation green */
+    border-width: 2px;
+}
+
+.honami-node-progress-container {
+    height: 4px;
+    background-color: rgba(0, 0, 0, 0.4);
+    margin: 4px 14px 10px 14px;
+    border-radius: 2px;
+    overflow: hidden;
+    display: none; /* Only show in play mode for active nodes */
+}
+
+.honami-node-active .honami-node-progress-container {
+    display: flex;
+}
+
+.honami-node-progress-bar {
+    height: 100%;
+    background-color: #8dbb5b;
+    border-radius: 2px;
+}
+
+.honami-transition-edge-active {
+    --edge-color: #8dbb5b;
+}
+
+.honami-transition-edge-active .honami-transition-badge {
+    border-color: #8dbb5b;
+    background-color: #1a2a1a;
+}
+
+/* ---------------- MacOS Sticky Note ---------------- */
+.honami-sticky-note {
+    background-color: #fdf6a6;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 150px;
+    min-height: 100px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-right-color: rgba(0,0,0,0.15);
+    border-bottom-color: rgba(0,0,0,0.15);
+    position: absolute;
+    
+    transition-property: height, min-height;
+    transition-duration: 0.2s;
+}
+
+.honami-sticky-note:selected {
+    border-color: rgba(0,0,0,0.3);
+}
+
+.honami-sticky-note > #header {
+    height: 22px;
+    background-color: #fdf178;
+    flex-direction: row;
+    align-items: center;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(0,0,0,0.05);
+}
+
+.honami-sticky-note > #header > #close-btn,
+.honami-sticky-note > #header > #collapse-btn {
+    width: 12px;
+    height: 12px;
+    margin: 0 4px;
+    padding: 0;
+    border-radius: 6px;
+    border-width: 0;
+    cursor: link;
+    transition-property: opacity;
+    transition-duration: 0.1s;
+    opacity: 0.8;
+}
+
+.honami-sticky-note > #header > #close-btn {
+    background-color: #ff5f56;
+}
+
+.honami-sticky-note > #header > #collapse-btn {
+    background-color: #27c93f;
+}
+
+.honami-sticky-note > #header > #close-btn:hover,
+.honami-sticky-note > #header > #collapse-btn:hover {
+    opacity: 1.0;
+}
+
+.honami-sticky-note > #header > #title-label,
+.honami-sticky-note > #header > #title-field {
+    flex-grow: 1;
+    margin: 0 4px;
+}
+
+.honami-sticky-note > #header > #title-label,
+.honami-sticky-note > #header > #title-field > .unity-base-field__input {
+    background-color: transparent;
+    border-width: 0;
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: rgba(0,0,0,0.8);
+    padding: 0;
+    margin: 0;
+}
+
+.honami-sticky-note > #header > #title-label:hover,
+.honami-sticky-note > #header > #title-field > .unity-base-field__input:hover,
+.honami-sticky-note > #header > #title-field > .unity-base-field__input:focus {
+    background-color: rgba(0,0,0,0.05);
+}
+
+.honami-sticky-note > #contents-container {
+    flex-grow: 1;
+    margin: 4px;
+}
+
+.honami-sticky-note > #contents-container > #contents-label,
+.honami-sticky-note > #contents-container > #contents-field > .unity-base-field__input {
+    background-color: transparent;
+    border-width: 0;
+    font-size: 12px;
+    color: rgba(0,0,0,0.85);
+    white-space: normal;
+    padding: 4px;
+    margin: 0;
+}
+
+.honami-sticky-note > #contents-container > #contents-label:hover,
+.honami-sticky-note > #contents-container > #contents-field > .unity-base-field__input:hover,
+.honami-sticky-note > #contents-container > #contents-field > .unity-base-field__input:focus {
+    background-color: rgba(0,0,0,0.05);
+}
+
+.honami-sticky-note.collapsed {
+    min-height: 22px !important;
+    max-height: 22px !important;
+    height: 22px !important;
+}
+
+.honami-sticky-note.collapsed > #contents-container {
+    display: none;
+}
+
+/* Hide the default Unity bottom-right resizer completely, as we use custom 8-way EdgeResizers */
+.honami-sticky-note > .unity-resizer {
+    display: none;
+}
+
+.sticky-resizer {
+    position: absolute;
+    background-color: transparent;
+}
+
+.sticky-resizer.top { top: -5px; height: 10px; left: 10px; right: 10px; cursor: resize-vertical; }
+.sticky-resizer.bottom { bottom: -5px; height: 10px; left: 10px; right: 10px; cursor: resize-vertical; }
+.sticky-resizer.left { left: -5px; width: 10px; top: 10px; bottom: 10px; cursor: resize-horizontal; }
+.sticky-resizer.right { right: -5px; width: 10px; top: 10px; bottom: 10px; cursor: resize-horizontal; }
+
+.sticky-resizer.top-left { top: -5px; left: -5px; width: 15px; height: 15px; cursor: resize-up-left; }
+.sticky-resizer.top-right { top: -5px; right: -5px; width: 15px; height: 15px; cursor: resize-up-right; }
+.sticky-resizer.bottom-left { bottom: -5px; left: -5px; width: 15px; height: 15px; cursor: resize-up-right; }
+.sticky-resizer.bottom-right { bottom: -5px; right: -5px; width: 15px; height: 15px; cursor: resize-up-left; }
+
+.honami-sticky-note.collapsed > .sticky-resizer.bottom,
+.honami-sticky-note.collapsed > .sticky-resizer.bottom-left,
+.honami-sticky-note.collapsed > .sticky-resizer.bottom-right {
+    display: none;
+}
+
+/* ---------------- Sub-Nodes Visuals (Badges) ---------------- */
+.honami-node-subnodes-bar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 2px 14px 10px 14px;
+    margin-top: -6px;
+}
+
+.honami-node-subnode-badge {
+    background-color: rgba(255, 71, 133, 0.10);
+    border-color: rgba(255, 71, 133, 0.42);
+    border-width: 1px;
+    border-radius: 4px;
+    color: #ff4785;
+    padding: 2px 6px;
+    margin: 2px;
+    font-size: 10px;
+    -unity-font-style: bold;
+    
+    transition-property: background-color, border-color, scale;
+    transition-duration: 0.15s;
+}
+
+.honami-node-subnode-badge-hover {
+    background-color: rgba(255, 71, 133, 0.28);
+    border-color: #ff4785;
+    color: #fff;
+    cursor: link;
+    scale: 1.05;
+}
+
+.honami-animated .honami-node-subnode-badge {
+    transition-property: background-color, border-color, scale;
+}
+
+.honami-node-subnode-badge:hover {
+    background-color: rgba(255, 71, 133, 0.20);
+    border-color: rgba(255, 71, 133, 0.62);
+    scale: 1.05;
+}
+
+.honami-node-subnode-badge:active {
+    scale: 0.95;
+    background-color: rgba(255, 71, 133, 0.40);
+    border-color: #ff4785;
+}
+
+.honami-node-subnode-badge-selected,
+.honami-node-subnode-badge-selected:hover {
+    background-color: #ff4785;
+    border-color: #ff4785;
+    color: #ffffff;
+    scale: 1.1;
+}

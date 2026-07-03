@@ -1,0 +1,82 @@
+.honami-notification-container {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform-origin: center;
+    width: 400px;
+    margin-left: -200px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.honami-notification-item {
+    background-color: rgba(36, 38, 41, 0.95);
+    border-color: rgba(255, 255, 255, 0.1);
+    border-width: 1px;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    
+    /* Animation initial state */
+    opacity: 0;
+    translate: 0 20px;
+    scale: 0.95;
+    transition-property: opacity, translate, scale;
+    transition-duration: 0.35s;
+    transition-timing-function: ease-out-back;
+}
+
+.honami-notification-item--visible {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+}
+
+.honami-notification-item__icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.honami-notification-item__text-container {
+    flex-grow: 1;
+}
+
+.honami-notification-item__title {
+    color: #ffffff;
+    font-size: 13px;
+    -unity-font-style: bold;
+}
+
+.honami-notification-item__message {
+    color: #b0b0b0;
+    font-size: 11px;
+    white-space: normal;
+}
+
+.honami-notification-item__close-button {
+    width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    background-color: transparent;
+    border-width: 0;
+    color: #808080;
+    -unity-text-align: middle-center;
+    padding: 0;
+    margin-left: 8px;
+}
+
+.honami-notification-item__close-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+/* Notification Types Highlighting */
+.honami-notification-item--info { border-left-color: #4bd4ff; border-left-width: 4px; }
+.honami-notification-item--warning { border-left-color: #ffcc00; border-left-width: 4px; }
+.honami-notification-item--error { border-left-color: #f14c4c; border-left-width: 4px; }
+.honami-notification-item--success { border-left-color: #8dbb5b; border-left-width: 4px; }

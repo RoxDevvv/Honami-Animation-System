@@ -1,0 +1,20 @@
+{
+    "name": "HonamiAnimationSystem.Editor",
+    "rootNamespace": "HonamiAnimationSystem.Editor",
+    "references": [
+        "HonamiAnimationSystem.Runtime",
+        "Unity.Timeline",
+        "Unity.Timeline.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
