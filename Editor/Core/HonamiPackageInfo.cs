@@ -41,7 +41,7 @@ namespace HonamiAnimationSystem.Editor
                 {
                     var json = File.ReadAllText(path);
                     _version = ExtractString(json, "version") ?? _version;
-                    _repositoryUrl = ExtractNestedString(json, "author", "url") ?? _repositoryUrl;
+                    _repositoryUrl = ExtractNestedString(json, "repository", "url") ?? _repositoryUrl;
                     _displayName = ExtractString(json, "displayName") ?? _displayName;
                 }
                 catch (Exception e)

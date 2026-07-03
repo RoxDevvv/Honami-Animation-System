@@ -9,6 +9,10 @@
     "name": "LOYAL Studio",
     "url": "https://github.com/loyal-studio"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/loyal-studio/Honami-Animation-System"
+  },
   "category": "Animation",
   "keywords": [
     "animation",
