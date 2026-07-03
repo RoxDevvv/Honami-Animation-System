@@ -31,24 +31,43 @@ namespace HonamiAnimationSystem.Editor
             _repositoryUrl = string.Empty;
             _displayName = "Honami";
 
-            var guids = AssetDatabase.FindAssets("package", new[] { "Assets/HonamiAnimationSystem" });
-            foreach (var guid in guids)
+            try
             {
-                var path = AssetDatabase.GUIDToAssetPath(guid);
-                if (!path.EndsWith("package.json", StringComparison.OrdinalIgnoreCase)) continue;
-
-                try
+                var packageInfo = UnityEditor.PackageManager.PackageInfo.FindForAssembly(typeof(HonamiPackageInfo).Assembly);
+                if (packageInfo != null)
                 {
-                    var json = File.ReadAllText(path);
+                    var absolutePath = Path.Combine(packageInfo.resolvedPath, "package.json");
+                    if (File.Exists(absolutePath))
+                    {
+                        var json = File.ReadAllText(absolutePath);
+                        _version = ExtractString(json, "version") ?? _version;
+                        _repositoryUrl = ExtractNestedString(json, "repository", "url") ?? _repositoryUrl;
+                        _displayName = ExtractString(json, "displayName") ?? _displayName;
+                        return;
+                    }
+                }
+
+                var guids = AssetDatabase.FindAssets("package");
+                foreach (var guid in guids)
+                {
+                    var path = AssetDatabase.GUIDToAssetPath(guid);
+                    if (!path.EndsWith("package.json", StringComparison.OrdinalIgnoreCase)) continue;
+
+                    var absolutePath = Path.GetFullPath(path);
+                    if (!File.Exists(absolutePath)) continue;
+
+                    var json = File.ReadAllText(absolutePath);
+                    if (ExtractString(json, "name") != PackageName) continue;
+
                     _version = ExtractString(json, "version") ?? _version;
                     _repositoryUrl = ExtractNestedString(json, "repository", "url") ?? _repositoryUrl;
                     _displayName = ExtractString(json, "displayName") ?? _displayName;
+                    break;
                 }
-                catch (Exception e)
-                {
-                    Debug.LogWarning($"[HonamiPackageInfo] Failed to parse package.json: {e.Message}");
-                }
-                break;
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[HonamiPackageInfo] Failed to parse package.json: {e.Message}");
             }
         }
 
