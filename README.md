@@ -41,7 +41,7 @@ Unity's built-in Animator is great - until it isn't. The moment your project gro
 | Node-graph editor | ✅ | ✅ |
 | Blend trees | ✅ | ✅ |
 | Avatar masking | ✅ | ✅ |
-| Timeline track support | ✅ | ✅ |
+| Full Timeline track support | ❌ | ✅ |
 | Pose & rigging constraints | ❌ | ✅ |
 | Pseudo-physics bones | ❌ | ✅ |
 | Per-animator FPS cap | ❌ | ✅ |
