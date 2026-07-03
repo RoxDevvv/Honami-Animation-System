@@ -6,7 +6,7 @@
   <a href="https://github.com/loyal-studio/Honami-Animation-System/releases">
     <img src="https://img.shields.io/badge/version-0.1.0--beta.1-ec407a?style=for-the-badge&logo=unity&logoColor=white" alt="Version"/>
   </a>
-  <a href="https://unity.com/releases/editor/whats-new/6000.0">
+  <a href="https://docs.unity3d.com/6000.0/Documentation/Manual/WhatsNewUnity6.html">
     <img src="https://img.shields.io/badge/Unity-6000.0%2B-26c6da?style=for-the-badge&logo=unity&logoColor=white" alt="Unity Version"/>
   </a>
   <img src="https://img.shields.io/badge/status-beta-ff7043?style=for-the-badge" alt="Beta"/>
