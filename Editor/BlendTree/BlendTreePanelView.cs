@@ -18,6 +18,7 @@ namespace HonamiAnimationSystem.Editor.BlendTree
 
         private VisualElement _mainArea;
         private int _topologySignature;
+        private bool _builtWithPreview;
         private bool _rebuildQueued;
 
         public BlendTreePanelView(BlendTreeState state, Action rebuild)
@@ -59,6 +60,7 @@ namespace HonamiAnimationSystem.Editor.BlendTree
             }
 
             _topologySignature = _state.TopologySignature();
+            _builtWithPreview = _state.ShowPreview;
 
             _mainArea = new VisualElement { style = { flexGrow = 1, flexDirection = FlexDirection.Row, minHeight = 0, overflow = Overflow.Hidden } };
             Add(_mainArea);
@@ -82,7 +84,9 @@ namespace HonamiAnimationSystem.Editor.BlendTree
             bool hasContent = _mainArea != null && _canvas != null;
             bool wantsContent = _state.Node != null;
 
-            if (hasContent != wantsContent || (wantsContent && _topologySignature != _state.TopologySignature()))
+            if (hasContent != wantsContent
+                || (wantsContent && _topologySignature != _state.TopologySignature())
+                || (wantsContent && _builtWithPreview != _state.ShowPreview))
             {
                 Build();
                 return;

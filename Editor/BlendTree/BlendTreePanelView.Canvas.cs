@@ -11,6 +11,7 @@ namespace HonamiAnimationSystem.Editor.BlendTree
         private readonly List<BlendTreeMotionCard> _motionNodes = new();
         private BlendTreeOutputCard _outputNode;
         private BlendTreeGraphEdges _edges;
+        private Vector2 _lastOutputSize;
 
         private void BuildCanvasArea()
         {
@@ -37,6 +38,7 @@ namespace HonamiAnimationSystem.Editor.BlendTree
             _motionNodes.Clear();
             _outputNode = null;
             _edges = null;
+            _lastOutputSize = _state.OutputNodeMeasuredSize;
 
             if (_state.Node == null) return;
 
@@ -44,12 +46,6 @@ namespace HonamiAnimationSystem.Editor.BlendTree
             _canvas.ContentContainer.Add(_edges);
 
             _outputNode = new BlendTreeOutputCard(_state, OnNodePositionChanged);
-            Vector2 outPos = _state.HasNodePositions
-                ? _state.OutputNodePosition
-                : new Vector2(-BlendTreeTheme.OutputNodeWidth * 0.5f, 40f);
-            _outputNode.style.left = outPos.x;
-            _outputNode.style.top = outPos.y;
-            _state.OutputNodePosition = outPos;
             _canvas.ContentContainer.Add(_outputNode);
 
             var motions = _state.Node.blendMotions;
@@ -59,61 +55,45 @@ namespace HonamiAnimationSystem.Editor.BlendTree
             for (int i = 0; i < motions.Count; i++)
             {
                 var motionProp = motionsProp.GetArrayElementAtIndex(i);
-                var nodeView = new BlendTreeMotionCard(motionProp, motions[i], i, motions.Count, _state, OnNodePositionChanged);
-
-                Vector2 nodePos = _state.HasNodePositions && _state.NodePositions.TryGetValue(i, out var saved)
-                    ? saved
-                    : ComputeTreePosition(i, motions.Count);
-                _state.NodePositions[i] = nodePos;
-
-                nodeView.style.left = nodePos.x;
-                nodeView.style.top = nodePos.y;
+                var nodeView = new BlendTreeMotionCard(motionProp, motions[i], i, motions.Count, _state, OnNodePositionChanged, RemoveMotion);
 
                 _canvas.ContentContainer.Add(nodeView);
                 _motionNodes.Add(nodeView);
             }
 
-            _state.HasNodePositions = true;
+            AutoLayout();
         }
 
-        private static Vector2 ComputeTreePosition(int index, int count)
+        private static Vector2 ComputeTreePosition(int index, int count, float motionY)
         {
             float horizontalSpacing = 60f;
             float totalWidth = (count * BlendTreeTheme.NodeWidth) + ((count - 1) * horizontalSpacing);
             float startX = -(totalWidth * 0.5f);
             float x = startX + index * (BlendTreeTheme.NodeWidth + horizontalSpacing);
-            return new Vector2(x, 240f);
+            return new Vector2(x, motionY);
+        }
+
+        private float GetMotionRowY(float outputY)
+        {
+            const float gap = 40f;
+            float outH = _state.OutputNodeMeasuredSize.y > 0f
+                ? _state.OutputNodeMeasuredSize.y
+                : (_state.ShowPreview ? 250f : 110f);
+            return outputY + outH + gap;
         }
 
         private void OnNodePositionChanged()
         {
-            if (_outputNode != null)
-                _state.OutputNodePosition = new Vector2(_outputNode.style.left.value.value, _outputNode.style.top.value.value);
-
-            for (int i = 0; i < _motionNodes.Count; i++)
-            {
-                var node = _motionNodes[i];
-                _state.NodePositions[i] = new Vector2(node.style.left.value.value, node.style.top.value.value);
-            }
-
+            AutoLayout();
             _edges?.MarkDirtyRepaint();
         }
 
         public void AutoLayout()
         {
-            if (_state.Node == null || _motionNodes.Count == 0) return;
+            if (_state.Node == null) return;
 
-            int count = _motionNodes.Count;
-
-            for (int i = 0; i < count; i++)
-            {
-                var pos = ComputeTreePosition(i, count);
-                _motionNodes[i].style.left = pos.x;
-                _motionNodes[i].style.top = pos.y;
-                _state.NodePositions[i] = pos;
-            }
-
-            var outPos = new Vector2(-BlendTreeTheme.OutputNodeWidth * 0.5f, 40f);
+            float outputWidth = _state.ShowPreview ? BlendTreeTheme.OutputNodePreviewWidth : BlendTreeTheme.OutputNodeWidth;
+            var outPos = new Vector2(-outputWidth * 0.5f, 40f);
             if (_outputNode != null)
             {
                 _outputNode.style.left = outPos.x;
@@ -121,7 +101,16 @@ namespace HonamiAnimationSystem.Editor.BlendTree
             }
             _state.OutputNodePosition = outPos;
 
-            OnNodePositionChanged();
+            int count = _motionNodes.Count;
+            float motionY = GetMotionRowY(40f);
+            for (int i = 0; i < count; i++)
+            {
+                var pos = ComputeTreePosition(i, count, motionY);
+                _motionNodes[i].style.left = pos.x;
+                _motionNodes[i].style.top = pos.y;
+                _state.NodePositions[i] = pos;
+            }
+
             _canvas.schedule.Execute(FrameAll).ExecuteLater(50);
         }
 

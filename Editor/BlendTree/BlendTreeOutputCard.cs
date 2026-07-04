@@ -16,10 +16,8 @@ namespace HonamiAnimationSystem.Editor.BlendTree
         private Label _previewValueLabel;
         private Label _blendTypeBadge;
         private VisualElement _liveFill;
+        private HonamiBlendTreePreview _preview;
 
-        private bool _isDragging;
-        private Vector2 _dragStartMouse;
-        private Vector2 _dragStartPos;
         private Action _onPositionChanged;
 
         public BlendTreeOutputCard(BlendTreeState state, Action onPositionChanged)
@@ -30,7 +28,7 @@ namespace HonamiAnimationSystem.Editor.BlendTree
             name = "output-card";
             AddToClassList("honami-node-blend");
             style.position = Position.Absolute;
-            style.width = BlendTreeTheme.OutputNodeWidth;
+            style.width = _state.ShowPreview ? BlendTreeTheme.OutputNodePreviewWidth : BlendTreeTheme.OutputNodeWidth;
             style.backgroundColor = HonamiGraphStyles.BoxBg;
             style.borderTopColor = style.borderBottomColor = style.borderLeftColor = style.borderRightColor = HonamiGraphStyles.BoxBorder;
             style.borderTopWidth = style.borderBottomWidth = style.borderLeftWidth = style.borderRightWidth = 1;
@@ -42,10 +40,7 @@ namespace HonamiAnimationSystem.Editor.BlendTree
             topBar.AddToClassList("honami-node-top-blend");
             Add(topBar);
 
-            topBar.RegisterCallback<PointerDownEvent>(OnDragStart);
-            topBar.RegisterCallback<PointerMoveEvent>(OnDragMove);
-            topBar.RegisterCallback<PointerUpEvent>(OnDragEnd);
-            topBar.RegisterCallback<PointerCaptureOutEvent>(OnDragEnd);
+
 
             var body = new VisualElement();
             body.AddToClassList("honami-bt-node-body");
@@ -185,52 +180,38 @@ namespace HonamiAnimationSystem.Editor.BlendTree
 
             body.Add(previewRow);
 
-            RefreshInfo(state);
-        }
-
-        private void OnDragStart(PointerDownEvent evt)
-        {
-            if (evt.button != 0) return;
-            _isDragging = true;
-            _dragStartMouse = evt.position;
-            _dragStartPos = new Vector2(style.left.value.value, style.top.value.value);
-            (evt.currentTarget as VisualElement)?.CapturePointer(evt.pointerId);
-            BringToFront();
-            evt.StopPropagation();
-        }
-
-        private void OnDragMove(PointerMoveEvent evt)
-        {
-            if (_isDragging && (evt.currentTarget as VisualElement).HasPointerCapture(evt.pointerId))
+            if (_state.ShowPreview)
             {
-                Vector2 delta = (Vector2)evt.position - _dragStartMouse;
-                delta /= _state.ViewScale;
-
-                Vector2 newPos = _dragStartPos + delta;
-                style.left = newPos.x;
-                style.top = newPos.y;
-                evt.StopPropagation();
-
-                _onPositionChanged?.Invoke();
-            }
-        }
-
-        private void OnDragEnd(PointerUpEvent evt) { EndDrag(evt); }
-        private void OnDragEnd(PointerCaptureOutEvent evt) { EndDrag(evt); }
-
-        private void EndDrag(EventBase evt)
-        {
-            if (_isDragging)
-            {
-                _isDragging = false;
-                if (evt.target is VisualElement ve && evt is IPointerEvent pe)
+                var previewSeparator = new VisualElement
                 {
-                    ve.ReleasePointer(pe.pointerId);
-                }
-                _onPositionChanged?.Invoke();
-                evt.StopPropagation();
+                    style =
+                    {
+                        height = 1,
+                        backgroundColor = BlendTreeTheme.SubtleLine,
+                        marginTop = 8,
+                        marginBottom = 8,
+                        marginLeft = -8,
+                        marginRight = -8
+                    }
+                };
+                body.Add(previewSeparator);
+
+                _preview = new HonamiBlendTreePreview(_state);
+                body.Add(_preview);
             }
+
+            RefreshInfo(state);
+
+            RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
         }
+
+        private void OnGeometryChanged(GeometryChangedEvent evt)
+        {
+            _state.OutputNodeMeasuredSize = new Vector2(evt.newRect.width, evt.newRect.height);
+            _onPositionChanged?.Invoke();
+        }
+
+
 
         public void RefreshInfo(BlendTreeState state)
         {
@@ -249,6 +230,8 @@ namespace HonamiAnimationSystem.Editor.BlendTree
             float range = max - min;
             float t = range > 0.0001f ? Mathf.Clamp01((paramValue - min) / range) : 0f;
             _liveFill.style.width = Length.Percent(t * 100f);
+
+            _preview?.MarkDirty();
         }
 
         private static Label Caption(string text)

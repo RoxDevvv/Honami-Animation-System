@@ -32,11 +32,13 @@ namespace HonamiAnimationSystem.Editor.BlendTree
         private static bool IsFinite(float v) => !float.IsNaN(v) && !float.IsInfinity(v);
 
         public bool ShowProperties = true;
+        public bool ShowPreview = true;
         public float PropsWidth = BlendTreeTheme.PropsWidth;
         public float[] Weights = System.Array.Empty<float>();
         public (float threshold, int index)[] Sorted = System.Array.Empty<(float, int)>();
         public System.Collections.Generic.Dictionary<int, Vector2> NodePositions = new();
         public Vector2 OutputNodePosition = new(-BlendTreeTheme.OutputNodeWidth * 0.5f, 40f);
+        public Vector2 OutputNodeMeasuredSize;
         public bool HasNodePositions;
 
         public int MotionCount => Node != null && Node.blendMotions != null ? Node.blendMotions.Count : 0;
@@ -140,12 +142,14 @@ namespace HonamiAnimationSystem.Editor.BlendTree
         public void LoadSettings()
         {
             ShowProperties = BlendTreeSettings.ShowProperties;
+            ShowPreview = BlendTreeSettings.ShowPreview;
             PropsWidth = BlendTreeSettings.PropsWidth;
         }
 
         public void SaveSettings()
         {
             BlendTreeSettings.ShowProperties = ShowProperties;
+            BlendTreeSettings.ShowPreview = ShowPreview;
             BlendTreeSettings.PropsWidth = PropsWidth;
         }
     }

@@ -23,17 +23,16 @@ namespace HonamiAnimationSystem.Editor.BlendTree
         private VisualElement _arcContainer;
         private Label _arcLabel;
 
-        private bool _isDragging;
-        private Vector2 _dragStartMouse;
-        private Vector2 _dragStartPos;
         private Action _onPositionChanged;
+        private Action<int> _onRemove;
 
-        public BlendTreeMotionCard(SerializedProperty motionProp, HonamiBlendTreeMotion motion, int index, int count, BlendTreeState state, Action onPositionChanged)
+        public BlendTreeMotionCard(SerializedProperty motionProp, HonamiBlendTreeMotion motion, int index, int count, BlendTreeState state, Action onPositionChanged, Action<int> onRemove)
         {
             Index = index;
             _color = BlendTreeTheme.MotionColor(index, count);
             _state = state;
             _onPositionChanged = onPositionChanged;
+            _onRemove = onRemove;
 
             name = $"motion-card-{index}";
             AddToClassList("honami-node-animation");
@@ -50,10 +49,7 @@ namespace HonamiAnimationSystem.Editor.BlendTree
             topBar.style.backgroundColor = _color;
             Add(topBar);
 
-            topBar.RegisterCallback<PointerDownEvent>(OnDragStart);
-            topBar.RegisterCallback<PointerMoveEvent>(OnDragMove);
-            topBar.RegisterCallback<PointerUpEvent>(OnDragEnd);
-            topBar.RegisterCallback<PointerCaptureOutEvent>(OnDragEnd);
+
 
             var body = new VisualElement();
             body.AddToClassList("honami-bt-node-body");
@@ -89,6 +85,41 @@ namespace HonamiAnimationSystem.Editor.BlendTree
             textContainer.Add(subtitleLabel);
 
             headerRow.Add(textContainer);
+
+            var deleteButton = new Button(() => _onRemove?.Invoke(Index))
+            {
+                text = "X",
+                tooltip = "Remove Motion",
+                style =
+                {
+                    width = 20,
+                    height = 20,
+                    backgroundColor = new Color(0, 0, 0, 0.2f),
+                    color = BlendTreeTheme.MutedText,
+                    unityFontStyleAndWeight = FontStyle.Bold,
+                    borderTopLeftRadius = 4,
+                    borderTopRightRadius = 4,
+                    borderBottomLeftRadius = 4,
+                    borderBottomRightRadius = 4,
+                    borderTopWidth = 0,
+                    borderBottomWidth = 0,
+                    borderLeftWidth = 0,
+                    borderRightWidth = 0
+                }
+            };
+            
+            // Hover effects
+            deleteButton.RegisterCallback<MouseEnterEvent>(e => {
+                deleteButton.style.backgroundColor = new Color(0.8f, 0.2f, 0.2f, 0.8f);
+                deleteButton.style.color = Color.white;
+            });
+            deleteButton.RegisterCallback<MouseLeaveEvent>(e => {
+                deleteButton.style.backgroundColor = new Color(0, 0, 0, 0.2f);
+                deleteButton.style.color = BlendTreeTheme.MutedText;
+            });
+
+            headerRow.Add(deleteButton);
+
             body.Add(headerRow);
 
             var separator = new VisualElement
@@ -181,50 +212,7 @@ namespace HonamiAnimationSystem.Editor.BlendTree
             body.Add(valuesRow);
         }
 
-        private void OnDragStart(PointerDownEvent evt)
-        {
-            if (evt.button != 0) return;
-            _isDragging = true;
-            _dragStartMouse = evt.position;
-            _dragStartPos = new Vector2(style.left.value.value, style.top.value.value);
-            (evt.currentTarget as VisualElement)?.CapturePointer(evt.pointerId);
-            BringToFront();
-            evt.StopPropagation();
-        }
 
-        private void OnDragMove(PointerMoveEvent evt)
-        {
-            if (_isDragging && (evt.currentTarget as VisualElement).HasPointerCapture(evt.pointerId))
-            {
-                // Pointer delta is in panel space; the content container is scaled by ViewScale, so divide to move in node space.
-                Vector2 delta = (Vector2)evt.position - _dragStartMouse;
-                delta /= _state.ViewScale;
-
-                Vector2 newPos = _dragStartPos + delta;
-                style.left = newPos.x;
-                style.top = newPos.y;
-                evt.StopPropagation();
-
-                _onPositionChanged?.Invoke();
-            }
-        }
-
-        private void OnDragEnd(PointerUpEvent evt) { EndDrag(evt); }
-        private void OnDragEnd(PointerCaptureOutEvent evt) { EndDrag(evt); }
-
-        private void EndDrag(EventBase evt)
-        {
-            if (_isDragging)
-            {
-                _isDragging = false;
-                if (evt.target is VisualElement ve && evt is IPointerEvent pe)
-                {
-                    ve.ReleasePointer(pe.pointerId);
-                }
-                _onPositionChanged?.Invoke();
-                evt.StopPropagation();
-            }
-        }
 
         private void OnDrawArc(MeshGenerationContext ctx)
         {

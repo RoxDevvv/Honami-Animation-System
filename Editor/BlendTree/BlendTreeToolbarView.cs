@@ -22,6 +22,7 @@ namespace HonamiAnimationSystem.Editor.BlendTree
         private DropdownField _stateDropdown;
         private Label _blendTypeLabel;
         private Toggle _propsToggle;
+        private Toggle _previewToggle;
         private readonly List<string> _stateChoices = new();
         private readonly List<string> _stateGuids = new();
 
@@ -49,6 +50,7 @@ namespace HonamiAnimationSystem.Editor.BlendTree
         {
             _controllerField?.SetValueWithoutNotify(_state.Controller);
             _propsToggle?.SetValueWithoutNotify(_state.ShowProperties);
+            _previewToggle?.SetValueWithoutNotify(_state.ShowPreview);
             RefreshStateDropdown();
             RefreshBlendTypeLabel();
         }
@@ -119,6 +121,15 @@ namespace HonamiAnimationSystem.Editor.BlendTree
             });
             _propsToggle.tooltip = "Show / hide the properties panel";
             scroll.Add(_propsToggle);
+
+            _previewToggle = HonamiToolbarControls.ToolbarToggle("Preview", _state.ShowPreview, value =>
+            {
+                _state.ShowPreview = value;
+                _state.SaveSettings();
+                _rebuild();
+            });
+            _previewToggle.tooltip = "Show / hide the live skeleton preview";
+            scroll.Add(_previewToggle);
 
             Refresh();
         }

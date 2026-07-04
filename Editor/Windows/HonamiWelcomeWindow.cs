@@ -39,12 +39,16 @@ namespace HonamiAnimationSystem.Editor
         private static void BootstrapFirstRun()
         {
             if (Application.isBatchMode) return;
+            if (SessionState.GetBool(SessionShownKey, false)) return;
+            if (EditorPrefs.GetBool(SeenKey, false)) return;
+
+            SessionState.SetBool(SessionShownKey, true);
 
             EditorApplication.delayCall += () =>
             {
-                if (SessionState.GetBool(SessionShownKey, false)) return;
+                if (EditorApplication.isCompiling) return;
+                if (EditorApplication.isPlayingOrWillChangePlaymode) return;
                 if (EditorPrefs.GetBool(SeenKey, false)) return;
-                SessionState.SetBool(SessionShownKey, true);
                 ShowWindow();
             };
         }

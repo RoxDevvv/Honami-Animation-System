@@ -139,6 +139,7 @@ namespace HonamiAnimationSystem.Editor.BlendTree
             header.Add(ColumnLabel("Threshold", width: 66));
             header.Add(ColumnLabel("Speed", width: 54));
             header.Add(ColumnLabel("Mirror", width: 42));
+            header.Add(new VisualElement { style = { width = 24 } });
             parent.Add(header);
 
             const float rowHeight = 26f;
@@ -224,6 +225,27 @@ namespace HonamiAnimationSystem.Editor.BlendTree
             mirror.style.flexShrink = 0;
             row.Add(mirror);
 
+            var deleteBtn = new Button { text = "×", name = "deleteBtn", tooltip = "Remove Motion" };
+            deleteBtn.style.width = 20;
+            deleteBtn.style.height = 20;
+            deleteBtn.style.paddingLeft = 0;
+            deleteBtn.style.paddingRight = 0;
+            deleteBtn.style.paddingTop = 0;
+            deleteBtn.style.paddingBottom = 2;
+            deleteBtn.style.marginTop = 0;
+            deleteBtn.style.marginBottom = 0;
+            deleteBtn.style.marginLeft = 4;
+            deleteBtn.style.marginRight = 0;
+            deleteBtn.style.backgroundColor = new UnityEngine.Color(0, 0, 0, 0);
+            deleteBtn.style.borderTopWidth = 0;
+            deleteBtn.style.borderBottomWidth = 0;
+            deleteBtn.style.borderLeftWidth = 0;
+            deleteBtn.style.borderRightWidth = 0;
+            deleteBtn.style.color = new UnityEngine.Color(0.85f, 0.35f, 0.35f, 1f);
+            deleteBtn.style.fontSize = 16;
+            deleteBtn.style.unityFontStyleAndWeight = FontStyle.Bold;
+            row.Add(deleteBtn);
+
             row.RegisterCallback<ContextClickEvent>(OnMotionRowContext);
             return row;
         }
@@ -237,6 +259,10 @@ namespace HonamiAnimationSystem.Editor.BlendTree
             element.Q<FloatField>("threshold").BindProperty(motionProp.FindPropertyRelative("threshold"));
             element.Q<FloatField>("speed").BindProperty(motionProp.FindPropertyRelative("speed"));
             element.Q<Toggle>("mirror").BindProperty(motionProp.FindPropertyRelative("mirror"));
+
+            var deleteBtn = element.Q<Button>("deleteBtn");
+            deleteBtn.clickable = null;
+            deleteBtn.clicked += () => RemoveMotion(index);
 
             element.userData = index;
         }

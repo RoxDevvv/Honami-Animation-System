@@ -216,7 +216,6 @@ namespace HonamiAnimationSystem.Editor.BlendTree
             evt.menu.AppendAction("Distribute Thresholds Evenly", _ => _panel.DistributeThresholds(),
                 _state.MotionCount > 1 ? DropdownMenuAction.Status.Normal : DropdownMenuAction.Status.Disabled);
             evt.menu.AppendSeparator();
-            evt.menu.AppendAction("Auto Layout", _ => _panel.AutoLayout());
             evt.menu.AppendAction("Frame All", _ => _panel.FrameAll());
         }
 

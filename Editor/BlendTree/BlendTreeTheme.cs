@@ -12,6 +12,7 @@ namespace HonamiAnimationSystem.Editor.BlendTree
         public const float PropsMaxWidth = 560f;
         public const float NodeWidth = 280f;
         public const float OutputNodeWidth = 200f;
+        public const float OutputNodePreviewWidth = 260f;
         public const float ZoomMin = 0.25f;
         public const float ZoomMax = 2.5f;
 

@@ -5,6 +5,7 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 using HonamiAnimationSystem.Runtime.Core;
+using HonamiAnimationSystem.Editor.Preview;
 
 namespace HonamiAnimationSystem.Editor
 {
@@ -91,6 +92,15 @@ namespace HonamiAnimationSystem.Editor
                 }
                 root.Add(infoBox);
                 root.Add(new VisualElement { style = { height = 5 } });
+            }
+
+            if (HonamiTransitionPreview.CanPreviewTransition(owner, target))
+            {
+                var previewBox = HonamiGraphStyles.Box();
+                previewBox.Add(HonamiGraphStyles.SubTitle("Transition Preview"));
+                previewBox.Add(new HonamiTransitionPreview(owner, target, transition, controller));
+                root.Add(previewBox);
+                root.Add(new VisualElement { style = { height = 6 } });
             }
 
             if (owner?.node is HonamiPortalExitNode)

@@ -34,8 +34,9 @@ namespace HonamiAnimationSystem.Editor.BlendTree
             int count = _state.MotionCount;
             
             Vector2 outPos = _state.OutputNodePosition;
-            // 110f approximates the output card height so the edge meets its bottom-center input port.
-            Vector2 endPt = new Vector2(outPos.x + BlendTreeTheme.OutputNodeWidth * 0.5f, outPos.y + 110f);
+            float outW = _state.OutputNodeMeasuredSize.x > 0f ? _state.OutputNodeMeasuredSize.x : BlendTreeTheme.OutputNodeWidth;
+            float outH = _state.OutputNodeMeasuredSize.y > 0f ? _state.OutputNodeMeasuredSize.y : 110f;
+            Vector2 endPt = new Vector2(outPos.x + outW * 0.5f, outPos.y + outH);
 
             for (int i = 0; i < count; i++)
             {
