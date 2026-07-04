@@ -26,7 +26,7 @@
 
 Unity's built-in Animator is great - until it isn't. The moment your project grows, graphs become spaghetti, state machines explode, retargeting breaks your non-humanoid creatures, and every new feature means duplicating logic across dozens of controllers. Honami was built to solve exactly that.
 
-**The graph stays readable no matter how complex your character is.** Sub-Nodes keep secondary logic (sounds, VFX, IK hints, events) hidden inside states. Portal and Sequencer nodes eliminate the need for massive flat state machines. Override Controllers let you reuse entire graphs across character variants without copy-pasting.
+**The graph stays readable no matter how complex your character is.** Sub-Nodes keep secondary logic hidden inside states, while custom node types keep transitions clean and organized. Override Controllers let you reuse entire graphs across character variants without copy-pasting.
 
 **Any skeleton. No compromises.** Unity's Humanoid retargeting is a cage - it assumes a specific bipedal structure, costs CPU on every frame, and actively fights you when building anything non-human. Honami is rig-agnostic. Quadrupeds, spiders, mechs, vehicles, modular bosses - all work with the same pipeline, with full control over every bone.
 
@@ -36,26 +36,36 @@ Unity's built-in Animator is great - until it isn't. The moment your project gro
 
 **Zero runtime cost.** The evaluation loop produces no GC allocations per frame. Distant characters run at a capped FPS with smooth interpolation. Every API method has an integer-hash overload to keep hot paths allocation-free.
 
-| Feature | Built-in Animator | **Honami** |
-|---|:---:|:---:|
-| Node-graph editor | ✅ | ✅ |
-| Blend trees | ✅ | ✅ |
-| Avatar masking | ✅ | ✅ |
-| Full Timeline track support | ❌ | ✅ |
-| Pose & rigging constraints | ❌ | ✅ |
-| Pseudo-physics bones | ❌ | ✅ |
-| Per-animator FPS cap | ❌ | ✅ |
-| Linked animators | ❌ | ✅ |
-| Portal / Sequencer nodes | ❌ | ✅ |
-| Sub-Nodes architecture | ❌ | ✅ |
-| Live visual debugging | ❌ | ✅ |
-| Zero-allocation runtime | ❌ | ✅ |
-| Works with non-humanoid rigs | ❌ | ✅ |
-| Graph inheritance & override | ❌ | ✅ |
+| Feature / Aspect | Built-in Animator | Honami |
+|---|---|---|
+| **Underlying Engine** | ⚠️ Evaluated by Unity's closed native Mecanim loop (black-box, non-extendable). | ✅ Direct C# evaluation stack driving the `PlayableGraph` API (Animator Controller slot left empty). |
+| **Logic Style** | ⚠️ Standard Mecanim flat state machines (prone to transition spaghetti). | ✅ Modular runtime graphs supporting custom node types (`HonamiController`). |
+| **Controller & Layer Reuse** | ❌ Swaps clips only (via `AnimatorOverrideController`). Duplicating layers requires manual copy-paste. | ✅ True controller inheritance and layer overrides with virtual states and parameter propagation. |
+| **State Logic Extensibility** | ⚠️ `StateMachineBehaviour` (rigidly coupled to the GameObject, hard to pass references). | ✅ Sub-Nodes (`HonamiSubNodeBase`) with modular `OnEnter`/`Update`/`OnExit` lifecycle events. |
+| **Blend Trees** | ✅ Standard 1D/2D blend trees. | ⚠️ Partially implemented (1D fully supported, 2D in progress) with zero runtime allocation (`HonamiBlendTreeNode`). |
+| **Avatar & Masking** | ⚠️ Humanoid-first masking (limited bone hierarchy support, CPU-heavy retargeting). | ✅ Rig-agnostic mask atlas allowing masking on any arbitrary skeleton (`HonamiAvatarMask`). |
+| **Rigging & Constraints** | ⚠️ Requires external Animation Rigging package (decoupled from animator, complex setup). | ✅ Built-in rig-agnostic constraints (`HonamiPoseConstraint`, `HonamiLookAtConstraint`) as a final pass. |
+| **Timeline Integration** | ⚠️ Supported via Unity's Timeline package, but limited to basic clip playback (requires custom Playable scripts for state/parameter control). | ✅ Native tracks for state bindings, event sequencing, and live editor preview (`HonamiTimeline`). |
+| **Performance & GC** | ❌ Runs evaluation every frame; allocates memory during string-based parameter queries. | ✅ Zero GC allocations at runtime (uses integer-hash overloads) with per-animator FPS caps. |
+| **Live Debugging** | ❌ Basic active-state progress bar only. | ✅ Live node highlighting, active variables inspection, and transition progress tracking. |
+| **Rig Flexibility** | ❌ Retargeting and Avatar Masking are strictly humanoid-first. | ✅ 100% rig-agnostic; quadrupeds, mechs, and vehicles are first-class citizens. |
+| **Version Control** | ❌ Large binary/YAML AnimatorController assets that generate huge, merge-conflict-prone diffs. | ✅ Lightweight ScriptableObject assets generating clean, readable, and merge-friendly YAML diffs. |
 
 ### Clean graphs, not spaghetti
 
 The built-in Animator becomes an unreadable mess as a project grows. Honami keeps graphs clean with **Sub-Nodes** - secondary logic like sounds, VFX, or IK hints lives *inside* a state, invisible in the main flow. You see only what matters.
+
+### Honami Timeline & Animation Events
+
+If you have ever worked with animations in Unity, you know how crucial **Animation Events** are for triggering actions at precise frames (such as dealing damage during a sword slash or playing a reload sound). In the standard Unity Animator, this system is poorly implemented: events are baked directly into the animation clip itself and strictly couple the assets to your codebase.
+
+Honami takes a completely different approach, offering two independent event systems:
+* **Local Event** - Allows you to invoke local `UnityEvent` actions on a specific GameObject using the `HonamiLocalEventReceiver` component.
+* **Global Event** - A broadcasting system to propagate events globally across the entire scene via `HonamiGlobalEvent`.
+
+This is where the `HonamiTimeline` comes in. Instead of baking events into imported FBX files, you bind these events locally to the animation states (States) within your Honami Controller. You simply position the event triggers on the timeline where and when they should fire. This keeps your source animation clips 100% clean, and keeps the event logic exactly where it is easiest to manage.
+
+Additionally, the Timeline greatly simplifies debugging. It allows you to preview animation clips and test individual states directly inside the Unity Editor. For example, you can visually test how animation blending with a `HonamiAvatarMask` works without ever entering Play Mode.
 
 ### Built-in Rig System
 
