@@ -548,7 +548,7 @@ namespace HonamiAnimationSystem.Editor
                 HonamiEditorIcons.TimelineWhite, HonamiTimelineWindow.OpenWindow));
             grid.Add(ToolCard(
                 Localized("Blend Tree", "Блендтрі"),
-                Localized("Blend motion across 1D and 2D parameter spaces.", "Змішування руху в 1D та 2D просторах параметрів."),
+                Localized("Blend motion smoothly along a 1D parameter axis.", "Плавне змішування руху вздовж 1D-осі параметра."),
                 HonamiEditorIcons.BlendTreeWhite, HonamiBlendTreeWindow.OpenWindow));
             grid.Add(ToolCard(
                 Localized("Avatar Editor", "Редактор аватара"),
@@ -602,10 +602,10 @@ namespace HonamiAnimationSystem.Editor
         {
             var scroll = BuildStepScroll(page,
                 Localized("MIGRATION", "МІГРАЦІЯ"),
-                Localized("Drop-in replacement", "Заміна без болю"),
+                Localized("Migrate at your own pace", "Міграція у своєму темпі"),
                 Localized(
-                    "Moving to Honami is seamless. It works alongside your existing Animator components and uses standard AnimationClips.",
-                    "Перехід на Honami безшовний. Він працює поруч з існуючими Animator-компонентами та використовує стандартні AnimationClips."));
+                    "Moving to Honami is incremental. It works alongside your existing Animator components, plays standard AnimationClips, and converters help port controllers and code.",
+                    "Перехід на Honami поступовий. Він працює поруч з наявними Animator-компонентами, грає стандартні AnimationClips, а конвертери допомагають портувати контролери й код."));
 
             var grid = NewGrid();
             grid.Add(FeatureCard(

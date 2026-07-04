@@ -6,59 +6,65 @@ namespace HonamiAnimationSystem.Editor.Documentation.Pages
     {
         public string Title => HonamiDocLocalization.Get("Comparison of Approaches", "Порівняння підходів");
         public string Category => HonamiDocLocalization.Get("01. Welcome & Fundamentals", "01. Вступ та Основи");
-        public string SearchKeywords => "comparison mecanum tweening timeline advantages animator replacement migration порівняння переваги заміна міграція";
+        public string SearchKeywords => "comparison mecanim animator playables tweening timeline advantages limits when to use migration retargeting порівняння переваги обмеження коли використовувати заміна міграція";
         public int Order => 30;
-        public int EstimatedReadTime => 6;
+        public int EstimatedReadTime => 7;
 
         public void BuildContent(VisualElement root)
         {
             HonamiDocumentationBuilder.AddParagraph(root, HonamiDocLocalization.Get(
-                "In modern Unity development, there are several ways to move objects and skeletons. Understanding when to use Honami versus other systems is key to a clean architecture.",
-                "У сучасній розробці на Unity існує кілька способів переміщення об'єктів та скелетів. Розуміння того, коли використовувати Honami, а коли інші системи, є ключем до чистої архітектури."
+                "This page is an honest look at where Honami fits, where it does not, and how it relates to Unity's built-in Animator. Honami is a specialized tool built for code-driven action games — it is not a drop-in upgrade for every project, and this page is explicit about both sides.",
+                "Ця сторінка — чесний погляд на те, де Honami підходить, де ні, і як він співвідноситься з вбудованим Unity Animator. Honami — це спеціалізований інструмент для екшн-ігор із керуванням з коду. Він не є універсальним апгрейдом під будь-який проєкт, і ця сторінка відверто говорить про обидві сторони."
             ));
 
-            HonamiDocumentationBuilder.AddHeader(root, HonamiDocLocalization.Get("Honami vs. Unity Animator (Mecanim)", "Honami проти Unity Animator (Mecanim)"), HonamiEditorIcons.Controller);
+            HonamiDocumentationBuilder.AddHeader(root, HonamiDocLocalization.Get("What Honami actually is", "Чим Honami є насправді"), HonamiEditorIcons.Controller);
+            HonamiDocumentationBuilder.AddParagraph(root, HonamiDocLocalization.Get(
+                "Honami is not built on top of the Animator Controller. It builds and drives a Unity PlayableGraph directly — the same low-level Playables API that Unity itself uses. It still needs a Unity Animator component as the output bridge for skeletal evaluation, culling and Root Motion, but the Controller slot stays empty because Honami replaces the AnimatorController logic entirely with its own graph, parameter store, transition engine and node library.",
+                "Honami не побудований поверх Animator Controller. Він будує та керує Unity PlayableGraph напряму — тим самим низькорівневим Playables API, який використовує сам Unity. Йому все ще потрібен компонент Unity Animator як міст виводу для обчислення скелета, кулінгу та Root Motion, але слот Controller лишається порожнім, бо Honami повністю замінює логіку AnimatorController власним графом, parameter store, движком переходів і бібліотекою вузлів."
+            ));
+
+            HonamiDocumentationBuilder.AddHeader(root, HonamiDocLocalization.Get("Honami vs. Unity Animator (Mecanim)", "Honami проти Unity Animator (Mecanim)"), HonamiEditorIcons.GraphWhite);
+            HonamiDocumentationBuilder.AddParagraph(root, HonamiDocLocalization.Get(
+                "The differences below are architectural. Anywhere the built-in Animator already does the job well, it is not listed — this table only covers where the two genuinely diverge.",
+                "Різниці нижче — архітектурні. Там, де вбудований Animator і так добре справляється, воно не вказане — ця таблиця показує лише те, де підходи справді розходяться."
+            ));
             HonamiDocumentationBuilder.AddTable(root,
-                (HonamiDocLocalization.Get("Feature", "Функція"), 150),
+                (HonamiDocLocalization.Get("Area", "Аспект"), 150),
                 ("Unity Animator", 0),
                 ("Honami", 0),
-                ("Logic Style", "AnimatorController state machine", HonamiDocLocalization.Get("Modular runtime graph with custom nodes and sub-nodes", "Модульний runtime-граф із кастомними вузлами та підвузлами")),
-                ("Runtime Engine", "Unity AnimatorController evaluation", HonamiDocLocalization.Get("Honami evaluation stack driving PlayableGraph directly", "Власний стек обчислення Honami, який напряму керує PlayableGraph")),
-                ("Layer Reuse", "Manual duplication or nested state machines", HonamiDocLocalization.Get("Layer inheritance with virtual inherited states and per-state overrides", "Спадкування шарів із віртуальними успадкованими станами та точковими override")),
-                ("Controller Reuse", "AnimatorOverrideController mostly swaps clips", HonamiDocLocalization.Get("Override Controller can inherit layers, parameters and states, then replace nodes or add local layers", "Override Controller успадковує шари, параметри й стани, а потім замінює вузли або додає локальні шари")),
-                ("Debugging", "Limited runtime visibility", HonamiDocLocalization.Get("Live node highlighting, state progress, layer weights and transition values", "Живе підсвічування вузлів, прогрес станів, ваги шарів і значення переходів")),
-                ("Extensibility", "Difficult to extend without editor tooling", HonamiDocLocalization.Get("Create custom node types and state sub-nodes in C#", "Створення кастомних типів вузлів і state sub-nodes у C#")),
-                ("Version Control", "Animator assets often produce noisy diffs", HonamiDocLocalization.Get("Scriptable assets with smaller, clearer changes", "Scriptable assets із меншими та зрозумілішими змінами"))
+                (HonamiDocLocalization.Get("Runtime", "Рантайм"), HonamiDocLocalization.Get("AnimatorController evaluation — a black box", "Обчислення AnimatorController — чорний ящик"), HonamiDocLocalization.Get("Own evaluation stack over a PlayableGraph you can inspect", "Власний стек обчислення над PlayableGraph, який можна інспектувати")),
+                (HonamiDocLocalization.Get("Control style", "Стиль керування"), HonamiDocLocalization.Get("SetFloat / CrossFade; logic bolted onto the graph", "SetFloat / CrossFade; логіка прикручена до графа"), HonamiDocLocalization.Get("Code-first API: play/skip/pause states, runtime priority", "Code-first API: play/skip/pause станів, пріоритет у рантаймі")),
+                (HonamiDocLocalization.Get("Transitions", "Переходи"), HonamiDocLocalization.Get("Authored duration and exit time; runtime control limited to CrossFade duration", "Авторська тривалість та exit time; рантайм-контроль обмежений тривалістю CrossFade"), HonamiDocLocalization.Get("Runtime-parametric: priority interrupts, victim weighting, adaptive (Smart) duration", "Рантайм-параметричні: пріоритетні переривання, victim-зважування, адаптивна (Smart) тривалість")),
+                (HonamiDocLocalization.Get("Reuse", "Перевикористання"), HonamiDocLocalization.Get("Layer duplication; override controllers mostly swap clips", "Дублювання шарів; override-контролери переважно свопають кліпи"), HonamiDocLocalization.Get("Layer inheritance with virtual inherited states; override controllers inherit layers, params and states", "Спадкування шарів із virtual inherited states; override-контролери успадковують шари, параметри й стани")),
+                (HonamiDocLocalization.Get("Extensibility", "Розширюваність"), HonamiDocLocalization.Get("StateMachineBehaviour for per-state logic", "StateMachineBehaviour для логіки на стан"), HonamiDocLocalization.Get("Custom node types + ScriptableObject sub-nodes (shareable assets)", "Кастомні типи вузлів + ScriptableObject-сабноди (шаровані ассети)")),
+                (HonamiDocLocalization.Get("Many characters", "Багато персонажів"), HonamiDocLocalization.Get("No built-in cross-animator coordination", "Нема вбудованої координації між аніматорами"), HonamiDocLocalization.Get("Linked/Brain broadcast: react across many animators by tag, radius, wave or closest-N", "Linked/Brain broadcast: реакція на багатьох аніматорів за тегом, радіусом, хвилею чи N-найближчими")),
+                (HonamiDocLocalization.Get("Debugging", "Дебаг"), HonamiDocLocalization.Get("Limited runtime visibility", "Обмежена видимість у рантаймі"), HonamiDocLocalization.Get("Live node highlighting, state progress, layer weights, transition values", "Живе підсвічування вузлів, прогрес станів, ваги шарів, значення переходів"))
             );
+            HonamiDocumentationBuilder.AddCallout(root, HonamiDocLocalization.Get(
+                "Many of these traits (a PlayableGraph runtime, code-first control, allocation-free evaluation) are shared with other Playables-based animation solutions — they are not unique to Honami. What is specific to Honami is the combination: a visual node graph, a built-in node library, and the multi-character Linked layer in one package.",
+                "Багато з цих рис (рантайм на PlayableGraph, code-first контроль, обчислення без алокацій) спільні з іншими анімаційними рішеннями на базі Playables — вони не унікальні для Honami. Специфічним для Honami є саме поєднання: візуальний нодовий граф, вбудована бібліотека вузлів і мультиперсонажний Linked-шар в одному пакеті."
+            ), HonamiDocumentationBuilder.CalloutType.Info);
 
-            HonamiDocumentationBuilder.AddCallout(root,
-                HonamiDocLocalization.Get(
-                    "Honami still requires a Unity Animator component as the low-level bridge for skeletal output, culling and Root Motion. The Animator Controller slot should stay empty because Honami replaces the AnimatorController logic.",
-                    "Honami все ще потребує компонент Unity Animator як низькорівневий міст для скелетного виводу, кулінгу та Root Motion. Слот Animator Controller має лишатися порожнім, бо Honami замінює логіку AnimatorController."
-                ),
-                HonamiDocumentationBuilder.CalloutType.Warning);
-
-            HonamiDocumentationBuilder.AddHeader(root, HonamiDocLocalization.Get("The Non-Humanoid Problem", "Проблема non-humanoid"), HonamiEditorIcons.BlendTreeWhite);
+            HonamiDocumentationBuilder.AddHeader(root, HonamiDocLocalization.Get("Non-Humanoid & Exotic Rigs", "Non-Humanoid та екзотичні риги"), HonamiEditorIcons.BlendTreeWhite);
+            HonamiDocumentationBuilder.AddCallout(root, HonamiDocLocalization.Get(
+                "First, a myth to kill: you do NOT need a Humanoid rig to blend, layer or mask animations. Unity blends, layers and masks Generic rigs perfectly well — blending happens in local space regardless of rig type. Only retargeting a clip from one skeleton onto a different one requires a Humanoid Avatar.",
+                "Спершу вбиймо міф: НЕ потрібен Humanoid-риг, щоб блендити, шарувати чи маскувати анімації. Unity чудово блендить, шарує й маскує Generic-риги — бленд відбувається в local space незалежно від типу рига. Лише ретаргетинг кліпу з одного скелета на інший вимагає Humanoid Avatar."
+            ), HonamiDocumentationBuilder.CalloutType.Warning);
             HonamiDocumentationBuilder.AddParagraph(root, HonamiDocLocalization.Get(
-                "The main reason to use Honami is not only speed or nicer graphs. It is freedom from Unity's Humanoid-first assumptions. If a project has many enemies with strange silhouettes, Unity's Avatar setup, retargeting and Avatar Masks quickly become production friction.",
-                "Головна причина використовувати Honami — не лише швидкість або красивіші графи. Це свобода від Unity Humanoid-first assumptions. Якщо в проєкті багато ворогів із дивними силуетами, Unity Avatar setup, retargeting та Avatar Masks швидко стають виробничим тертям."
+                "The real friction with non-humanoid characters is authoring, not capability. A Unity Avatar Mask for a Generic rig is a manual transform tree — you tick bones by hand — and there is no body-part diagram to help. Honami's masks are bone-path native, built for arbitrary hierarchies (tentacles, weapon rigs, armor shells, split bodies), and it blends and mirrors them through its own avatar and mask atlas without any Humanoid setup. That workflow — not raw blending power — is the reason Honami is comfortable on strange silhouettes.",
+                "Справжнє тертя з non-humanoid персонажами — це авторинг, а не можливості. Avatar Mask для Generic-рига в Unity — це ручне transform-дерево, де кістки тикаєш вручну, без діаграми частин тіла на допомогу. Маски Honami — bone-path native, зроблені під довільні ієрархії (тентаклі, weapon rigs, armor shells, split bodies), і він блендить та віддзеркалює їх через власний avatar і mask atlas без жодного Humanoid-сетапу. Саме цей воркфлоу — а не сира потужність бленду — робить Honami зручним на дивних силуетах."
             ));
 
-            HonamiDocumentationBuilder.AddBulletPoint(root, HonamiDocLocalization.Get("Quadrupeds should not pretend to be bipeds just to get layered animation.", "Quadrupeds не мають прикидатися bipeds лише заради layered animation."));
-            HonamiDocumentationBuilder.AddBulletPoint(root, HonamiDocLocalization.Get("Tentacles, armor shells, weapon rigs and split bodies need bone-path masks, not humanoid body sections.", "Tentacles, armor shells, weapon rigs та split bodies потребують bone-path masks, а не humanoid body sections."));
-            HonamiDocumentationBuilder.AddBulletPoint(root, HonamiDocLocalization.Get("Honami blends arbitrary bone hierarchies through its own Avatar and mask atlas.", "Honami змішує довільні bone hierarchies через власний Avatar та mask atlas."));
-
-            HonamiDocumentationBuilder.AddHeader(root, HonamiDocLocalization.Get("Migration Mindset", "Мислення при міграції"), HonamiEditorIcons.GraphWhite);
-            HonamiDocumentationBuilder.AddTable(root,
-                (HonamiDocLocalization.Get("Animator habit", "Звичка Animator"), 190),
-                (HonamiDocLocalization.Get("Honami approach", "Підхід Honami"), 0),
-                ("", 0),
-                ("Any State spam", HonamiDocLocalization.Get("Use Any State/Repeater only for global interrupts; keep ordinary flow local to states.", "Використовуйте Any State/Repeater лише для глобальних переривань; звичайний flow тримайте локальним для станів."), ""),
-                ("Many duplicate layers", HonamiDocLocalization.Get("Use layer inheritance and override only the states that differ.", "Використовуйте спадкування шарів і перевизначайте лише стани, які відрізняються."), ""),
-                ("Animation Events everywhere", HonamiDocLocalization.Get("Use Honami events or Sub-Nodes so gameplay effects live with the active state.", "Використовуйте Honami events або Sub-Nodes, щоб gameplay-ефекти жили поруч з активним станом."), ""),
-                ("Clip-only override controllers", HonamiDocLocalization.Get("Use Honami Override Controllers when a variant needs different nodes, layers or parameters.", "Використовуйте Honami Override Controllers, коли варіанту потрібні інші вузли, шари або параметри."), ""),
-                ("Blend tree as a black box", HonamiDocLocalization.Get("Use explicit parameters, live debug values and custom nodes for readable behavior.", "Використовуйте явні параметри, live-debug значення та кастомні вузли для читабельної поведінки."), "")
-            );
+            HonamiDocumentationBuilder.AddHeader(root, HonamiDocLocalization.Get("What Honami does not do", "Чого Honami не робить"), HonamiEditorIcons.Controller);
+            HonamiDocumentationBuilder.AddBulletPoint(root, HonamiDocLocalization.Get(
+                "No Humanoid muscle-space retargeting. Honami binds animation by transform path, so a clip authored on one skeleton will not automatically play on a different one. Use a consistent skeleton across your characters, or keep Unity's Humanoid pipeline for retargeting marketplace clips.",
+                "Нема Humanoid muscle-space ретаргетингу. Honami прив'язує анімацію по transform-шляху, тож кліп, зроблений на одному скелеті, не заграє автоматично на іншому. Використовуйте єдиний скелет для персонажів або лишіть Humanoid-пайплайн Unity для ретаргетингу куплених кліпів."));
+            HonamiDocumentationBuilder.AddBulletPoint(root, HonamiDocLocalization.Get(
+                "Blend Trees are 1D only. There is no 2D blend space. For strafe-style locomotion, decompose into a signed 1D parameter plus states or layers.",
+                "Blend Tree лише 1D. 2D blend space немає. Для страйф-локомоції розкладайте на знаковий 1D-параметр плюс стани чи шари."));
+            HonamiDocumentationBuilder.AddBulletPoint(root, HonamiDocLocalization.Get(
+                "Overlays (aiming, holding) are done with masked layers. Additive / aim-offset blending is not built in yet.",
+                "Оверлеї (прицілювання, тримання) робляться масковими шарами. Additive / aim-offset бленду поки нема з коробки."));
 
             HonamiDocumentationBuilder.AddHeader(root, HonamiDocLocalization.Get("Code Comparison", "Порівняння в коді"), HonamiEditorIcons.Controller);
             HonamiDocumentationBuilder.AddCodeBlock(root,
@@ -71,22 +77,11 @@ animator.CrossFade(""Reload"", 0.12f, 1);
 honami.SetFloat(""Speed"", speed);
 honami.PlayState(""Reload"", transitionDuration: 0.12f, layer: 1, forceRestart: true);");
 
-            HonamiDocumentationBuilder.AddHeader(root, HonamiDocLocalization.Get("Honami vs. Tweening (DOTween/LeanTween)", "Honami проти Tween-систем"), HonamiEditorIcons.TimelineWhite);
+            HonamiDocumentationBuilder.AddHeader(root, HonamiDocLocalization.Get("Honami vs. Tweening & Timeline", "Honami проти твінів і Timeline"), HonamiEditorIcons.TimelineWhite);
             HonamiDocumentationBuilder.AddParagraph(root, HonamiDocLocalization.Get(
-                "Tweens are excellent for UI and simple linear movements. However, they lack the skeletal blending, layer masking, and state logic required for complex character behavior. Honami provides the same 'code-first' control as tweens but for full skeletal animation.",
-                "Твіни чудові для UI та простих лінійних переміщень. Проте їм бракує змішування скелета, маскування шарів та логіки станів, необхідних для складної поведінки персонажа. Honami надає такий самий контроль через код, як і твіни, але для повноцінної скелетної анімації."
+                "Tweens (DOTween/LeanTween) are great for UI panels, pickups and simple prop motion, but they have no skeletal blending, masking or state logic. Timeline is for non-interactive cutscenes with fixed timing. Reach for Honami when the pose must blend with locomotion, masks, transitions, Root Motion or state tags and react instantly to input.",
+                "Твіни (DOTween/LeanTween) чудові для UI-панелей, підбираних предметів і простого руху props, але в них нема скелетного бленду, маскування чи логіки станів. Timeline — для неінтерактивних катсцен із фіксованим таймінгом. Бери Honami, коли поза має змішуватися з локомоцією, масками, переходами, Root Motion чи state tags і миттєво реагувати на введення."
             ));
-
-            HonamiDocumentationBuilder.AddBulletPoint(root, HonamiDocLocalization.Get("Use tweens for UI panels, floating pickups and simple prop motion.", "Використовуйте твіни для UI-панелей, floating pickups і простого руху props."));
-            HonamiDocumentationBuilder.AddBulletPoint(root, HonamiDocLocalization.Get("Use Honami when the pose must blend with locomotion, masks, transitions, Root Motion or state tags.", "Використовуйте Honami, коли поза має змішуватися з locomotion, масками, переходами, Root Motion або state tags."));
-
-            HonamiDocumentationBuilder.AddHeader(root, HonamiDocLocalization.Get("When to use Timeline?", "Коли використовувати Timeline?"), HonamiEditorIcons.TimelineWhite);
-            HonamiDocumentationBuilder.AddCallout(root,
-                HonamiDocLocalization.Get(
-                    "Use Timeline for non-interactive cutscenes where timing is fixed. Use Honami for gameplay where animations must react instantly to player input and environmental changes.",
-                    "Використовуйте Timeline для неінтерактивних кат-сцен із фіксованим таймінгом. Використовуйте Honami для геймплею, де анімації мають миттєво реагувати на введення гравця та зміни в оточенні."
-                ),
-                HonamiDocumentationBuilder.CalloutType.Tip);
         }
     }
 }

@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://github.com/loyal-studio/Honami-Animation-System/releases">
-    <img src="https://img.shields.io/badge/version-0.1.0--beta.1-ec407a?style=for-the-badge&logo=unity&logoColor=white" alt="Version"/>
+    <img src="https://img.shields.io/badge/version-0.1.0--beta.3-ec407a?style=for-the-badge&logo=unity&logoColor=white" alt="Version"/>
   </a>
   <a href="https://docs.unity3d.com/6000.0/Documentation/Manual/WhatsNewUnity6.html">
     <img src="https://img.shields.io/badge/Unity-6000.0%2B-26c6da?style=for-the-badge&logo=unity&logoColor=white" alt="Unity Version"/>
@@ -24,11 +24,11 @@
 
 ## Why Honami?
 
-Unity's built-in Animator is great - until it isn't. The moment your project grows, graphs become spaghetti, state machines explode, retargeting breaks your non-humanoid creatures, and every new feature means duplicating logic across dozens of controllers. Honami was built to solve exactly that.
+Unity's built-in Animator is great - until it isn't. On a fast, code-driven action game the friction adds up: the graph turns to spaghetti, state machines explode, control logic gets bolted awkwardly onto a black-box runtime, and non-humanoid characters mean fighting the Avatar Mask and retargeting workflow. Honami was built by a game team, for exactly that kind of project.
 
 **The graph stays readable no matter how complex your character is.** Sub-Nodes keep secondary logic hidden inside states, while custom node types keep transitions clean and organized. Override Controllers let you reuse entire graphs across character variants without copy-pasting.
 
-**Any skeleton. No compromises.** Unity's Humanoid retargeting is a cage - it assumes a specific bipedal structure, costs CPU on every frame, and actively fights you when building anything non-human. Honami is rig-agnostic. Quadrupeds, spiders, mechs, vehicles, modular bosses - all work with the same pipeline, with full control over every bone.
+**Any skeleton, no Avatar dance.** To be clear: Unity animates, blends and masks Generic (non-humanoid) rigs perfectly well - blending is not a Humanoid privilege. The pain is the *workflow*: Avatar Masks for a generic rig are a manual transform tree with no body-part diagram, and Humanoid retargeting only exists for bipeds. Honami is rig-agnostic by design: bone-path masks, no Avatar setup, no retargeting step. Quadrupeds, spiders, mechs, vehicles and modular bosses all use the same pipeline with per-bone control.
 
 **Procedural where it matters.** Unity has no built-in rigging system inside its Animator (requiring a heavy, separate package with its own performance and setup limitations). Honami comes with native, high-performance rigging constraints: dynamic Pose Constraints to inject procedural postures (like sliding, recoil, or holding weapons), LookAt targeting for bone chains with per-bone weights, and springy pseudo-physics - all running as a final correction pass on top of authored animation, not instead of it.
 
@@ -42,14 +42,16 @@ Unity's built-in Animator is great - until it isn't. The moment your project gro
 | **Logic Style** | ⚠️ Standard Mecanim flat state machines (prone to transition spaghetti). | ✅ Modular runtime graphs supporting custom node types (`HonamiController`). |
 | **Controller & Layer Reuse** | ❌ Swaps clips only (via `AnimatorOverrideController`). Duplicating layers requires manual copy-paste. | ✅ True controller inheritance and layer overrides with virtual states and parameter propagation. |
 | **State Logic Extensibility** | ⚠️ `StateMachineBehaviour` (rigidly coupled to the GameObject, hard to pass references). | ✅ Sub-Nodes (`HonamiSubNodeBase`) with modular `OnEnter`/`Update`/`OnExit` lifecycle events. |
-| **Blend Trees** | ✅ Standard 1D/2D blend trees. | ⚠️ Partially implemented (1D fully supported, 2D in progress) with zero runtime allocation (`HonamiBlendTreeNode`). |
-| **Avatar & Masking** | ⚠️ Humanoid-first masking (limited bone hierarchy support, CPU-heavy retargeting). | ✅ Rig-agnostic mask atlas allowing masking on any arbitrary skeleton (`HonamiAvatarMask`). |
+| **Blend Trees** | ✅ 1D and 2D blend trees. | ⚠️ 1D only (Standard and Simple); 2D blend space not supported yet (`HonamiBlendTreeNode`). |
+| **Avatar & Masking** | ✅ Works on any rig, but generic masks are authored as a manual transform tree; the body-part diagram is Humanoid-only. | ✅ Bone-path mask atlas for any skeleton, no Humanoid Avatar required (`HonamiAvatar`). |
 | **Rigging & Constraints** | ⚠️ Requires external Animation Rigging package (decoupled from animator, complex setup). | ✅ Built-in rig-agnostic constraints (`HonamiPoseConstraint`, `HonamiLookAtConstraint`) as a final pass. |
 | **Timeline Integration** | ⚠️ Supported via Unity's Timeline package, but limited to basic clip playback (requires custom Playable scripts for state/parameter control). | ✅ Native tracks for state bindings, event sequencing, and live editor preview (`HonamiTimeline`). |
 | **Performance & GC** | ❌ Runs evaluation every frame; allocates memory during string-based parameter queries. | ✅ Zero GC allocations at runtime (uses integer-hash overloads) with per-animator FPS caps. |
 | **Live Debugging** | ❌ Basic active-state progress bar only. | ✅ Live node highlighting, active variables inspection, and transition progress tracking. |
-| **Rig Flexibility** | ❌ Retargeting and Avatar Masking are strictly humanoid-first. | ✅ 100% rig-agnostic; quadrupeds, mechs, and vehicles are first-class citizens. |
-| **Version Control** | ❌ Large binary/YAML AnimatorController assets that generate huge, merge-conflict-prone diffs. | ✅ Lightweight ScriptableObject assets generating clean, readable, and merge-friendly YAML diffs. |
+| **Retargeting** | ✅ Humanoid muscle-space retargeting across different skeletons. | ❌ None - binds by transform path, so use a consistent skeleton per character. |
+| **Version Control** | ⚠️ Monolithic AnimatorController asset; diffs can be noisy. | ✅ States and nodes are separate ScriptableObject assets, so changes stay localized. |
+
+> **Honest scope.** Honami is a specialized tool for code-driven action games (FPS, character-action, slashers) and custom or exotic skeletons - not a general Mecanim replacement for every project. It has no Humanoid muscle-space retargeting, its blend trees are 1D only, and overlays use masked layers (additive / aim-offset is on the roadmap).
 
 ### Clean graphs, not spaghetti
 
@@ -69,7 +71,7 @@ Additionally, the Timeline greatly simplifies debugging. It allows you to previe
 
 ### Built-in Rig System
 
-In standard Unity development, rigging constraints require the external **Animation Rigging** package. It is completely decoupled from the Animator, requires a complex setup, has significant performance overhead, and struggles with non-humanoid rigs.
+In standard Unity development, rigging constraints require the external **Animation Rigging** package - a separate dependency, decoupled from the Animator, with its own GameObject-based setup to wire up.
 
 Honami includes a high-performance, rig-agnostic constraint pipeline out of the box. No external packages, no humanoid limitations, and zero runtime setup overhead.
 
@@ -97,7 +99,7 @@ The evaluation loop produces **zero GC allocations** per frame. Distant characte
 
 ### Works with any rig
 
-Honami is rig-agnostic. Human, dragon, spider, vehicle - all treated with the same high-performance pipeline. No "Humanoid" retargeting tax, no 15-bone minimum. Full control over every bone, every frame.
+Honami is rig-agnostic. Human, dragon, spider, vehicle - all treated with the same pipeline: bone-path masks, no Avatar setup, no retargeting step, full control over every bone. (If you need to retarget marketplace Humanoid clips across different skeletons, that is a job for Unity's Humanoid pipeline, not Honami.)
 
 ## Screenshots
 
@@ -107,6 +109,8 @@ Honami is rig-agnostic. Human, dragon, spider, vehicle - all treated with the sa
   <img src="Screenshots/2.png" width="800" />
   <br/><br/>
   <img src="Screenshots/3.png" width="800" />
+  <br/><br/>
+  <img src="Screenshots/4.png" width="800" />
 </p>
 
 ## Used in Production

@@ -111,6 +111,8 @@ namespace HonamiAnimationSystem.Editor.BlendTree
                 _state.NodePositions[i] = pos;
             }
 
+            _state.HasNodePositions = true;
+
             _canvas.schedule.Execute(FrameAll).ExecuteLater(50);
         }
 
