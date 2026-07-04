@@ -405,63 +405,23 @@ Group > .mainContainer > #centralContainer > #contentContainer {
     background-color: #1e3a3f;
 }
 
-/* ---------------- Blend Tree Visualizer ---------------- */
-.honami-bt-visualizer-container {
-    height: 220px;
-    background-color: #1a1b1e;
-    border-top-width: 1px;
-    border-top-color: #000000;
-    padding: 0;
-    overflow: hidden;
+/* ---------------- Blend Tree Motion Nodes ---------------- */
+.honami-bt-node-body {
+    padding: 8px 12px 10px 12px;
+    background-color: transparent;
 }
 
-.honami-bt-visualizer-header {
-    flex-direction: row;
-    height: 38px;
-    background-color: #242629;
-    align-items: center;
-    border-bottom-width: 1px;
-    border-bottom-color: #111111;
-    padding: 0 15px;
-}
-
-.honami-bt-visualizer-title {
-    -unity-font-style: bold;
-    color: #ff4785;
+.honami-bt-node-field {
+    margin: 0;
     font-size: 11px;
-    opacity: 0.9;
 }
 
-.honami-bt-preview-slider {
-    width: 200px;
-    margin-left: 10px;
-}
-
-/* Fix slider overlap by removing internal label and adjusting width/margins */
-.honami-bt-preview-slider .unity-base-field__label {
-    display: none;
-}
-
-.honami-bt-weight-visualizer {
-    flex-grow: 1;
-    margin: 15px;
-    background-color: #141518;
-    border-width: 1px;
-    border-color: #1f1f22;
-    border-radius: 8px;
-}
-
-.honami-bt-preview-label {
-    color: #888888;
+.honami-bt-node-caption {
+    color: #7b8085;
     font-size: 10px;
     -unity-font-style: bold;
-    margin-left: 20px;
-}
-
-/* Motion Node Progress Bar highlights */
-.honami-bt-weight-progress-bar {
-    background-color: #8dbb5b; /* Animation green */
-    border-radius: 6px;
+    margin-right: 4px;
+    margin-left: 2px;
 }
 
 /* ---------------- Global Settings ---------------- */

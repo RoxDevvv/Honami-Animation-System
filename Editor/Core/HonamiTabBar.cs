@@ -1,43 +1,60 @@
 #if UNITY_EDITOR
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace HonamiAnimationSystem.Editor.Timeline
+namespace HonamiAnimationSystem.Editor
 {
-    internal sealed class TimelineTabBar : VisualElement
+    /// <summary>
+    /// Reusable horizontal tab strip driven entirely by callbacks, so it can be shared by
+    /// the Timeline and Blend Tree windows without owning any tab data itself.
+    /// </summary>
+    internal sealed class HonamiTabBar : VisualElement
     {
         private const float BarHeight = 24f;
 
-        private readonly Func<IReadOnlyList<TimelineState>> _getTabs;
+        private readonly Func<int> _getCount;
         private readonly Func<int> _getActive;
         private readonly Action<int> _onSelect;
         private readonly Action<int> _onClose;
         private readonly Action _onAdd;
+        private readonly Func<int, string> _getTitle;
+        private readonly Func<int, Texture> _getIcon;
+        private readonly Func<int, bool> _getShowDot;
+        private readonly string _dotTooltip;
         private readonly ScrollView _strip;
 
-        public TimelineTabBar(
-            Func<IReadOnlyList<TimelineState>> getTabs,
+        public Color ActiveTabColor { get; set; } = HonamiEditorTheme.PanelBg;
+
+        public HonamiTabBar(
+            Func<int> getCount,
             Func<int> getActive,
             Action<int> onSelect,
             Action<int> onClose,
-            Action onAdd)
+            Action onAdd,
+            Func<int, string> getTitle,
+            Func<int, Texture> getIcon,
+            Func<int, bool> getShowDot = null,
+            string dotTooltip = null)
         {
-            _getTabs = getTabs;
+            _getCount = getCount;
             _getActive = getActive;
             _onSelect = onSelect;
             _onClose = onClose;
             _onAdd = onAdd;
+            _getTitle = getTitle;
+            _getIcon = getIcon;
+            _getShowDot = getShowDot;
+            _dotTooltip = dotTooltip;
 
-            name = "honami-timeline-tabbar";
+            name = "honami-tabbar";
             style.height = BarHeight;
             style.flexShrink = 0;
             style.flexDirection = FlexDirection.Row;
             style.alignItems = Align.Stretch;
-            style.backgroundColor = TimelineTheme.ToolbarBg;
+            style.backgroundColor = HonamiEditorTheme.ToolbarBg;
             style.borderBottomWidth = 1;
-            style.borderBottomColor = TimelineTheme.Divider;
+            style.borderBottomColor = HonamiEditorTheme.Divider;
 
             _strip = new ScrollView(ScrollViewMode.Horizontal);
             _strip.style.flexGrow = 1;
@@ -53,16 +70,16 @@ namespace HonamiAnimationSystem.Editor.Timeline
         public void Refresh()
         {
             _strip.Clear();
-            var tabs = _getTabs();
+            int count = _getCount();
             int active = _getActive();
 
-            for (int i = 0; i < tabs.Count; i++)
-                _strip.Add(TabElement(tabs[i], i, i == active));
+            for (int i = 0; i < count; i++)
+                _strip.Add(TabElement(i, i == active));
 
             _strip.Add(AddButton());
         }
 
-        private VisualElement TabElement(TimelineState state, int index, bool isActive)
+        private VisualElement TabElement(int index, bool isActive)
         {
             var tab = new VisualElement
             {
@@ -76,11 +93,11 @@ namespace HonamiAnimationSystem.Editor.Timeline
                     paddingRight = 4,
                     minWidth = 90,
                     maxWidth = 220,
-                    backgroundColor = isActive ? TimelineTheme.PanelBg : Color.clear,
+                    backgroundColor = isActive ? ActiveTabColor : Color.clear,
                     borderTopWidth = 2,
-                    borderTopColor = isActive ? TimelineTheme.Accent : Color.clear,
+                    borderTopColor = isActive ? HonamiEditorTheme.Accent : Color.clear,
                     borderRightWidth = 1,
-                    borderRightColor = TimelineTheme.Divider
+                    borderRightColor = HonamiEditorTheme.Divider
                 }
             };
 
@@ -99,13 +116,13 @@ namespace HonamiAnimationSystem.Editor.Timeline
 
             if (!isActive)
             {
-                tab.RegisterCallback<PointerEnterEvent>(_ => tab.style.backgroundColor = TimelineTheme.ToolbarButtonHot);
+                tab.RegisterCallback<PointerEnterEvent>(_ => tab.style.backgroundColor = HonamiEditorTheme.ToolbarButtonHot);
                 tab.RegisterCallback<PointerLeaveEvent>(_ => tab.style.backgroundColor = Color.clear);
             }
 
             var icon = new Image
             {
-                image = TabIcon(state),
+                image = _getIcon(index),
                 pickingMode = PickingMode.Ignore,
                 tintColor = isActive ? Color.white : new Color(0.6f, 0.6f, 0.6f, 1f),
                 style =
@@ -118,7 +135,7 @@ namespace HonamiAnimationSystem.Editor.Timeline
             };
             tab.Add(icon);
 
-            if (state.PreviewEnabled)
+            if (_getShowDot != null && _getShowDot(index))
             {
                 tab.Add(new VisualElement
                 {
@@ -129,22 +146,22 @@ namespace HonamiAnimationSystem.Editor.Timeline
                         height = 7,
                         marginRight = 6,
                         flexShrink = 0,
-                        backgroundColor = TimelineTheme.Accent,
+                        backgroundColor = HonamiEditorTheme.Accent,
                         borderTopLeftRadius = 4,
                         borderTopRightRadius = 4,
                         borderBottomLeftRadius = 4,
                         borderBottomRightRadius = 4
                     },
-                    tooltip = "Preview enabled — contributes to scene sampling"
+                    tooltip = _dotTooltip
                 });
             }
 
-            var label = new Label(TabTitle(state))
+            var label = new Label(_getTitle(index))
             {
                 pickingMode = PickingMode.Ignore,
                 style =
                 {
-                    color = isActive ? TimelineTheme.Text : TimelineTheme.MutedText,
+                    color = isActive ? HonamiEditorTheme.Text : HonamiEditorTheme.MutedText,
                     fontSize = 11,
                     unityFontStyleAndWeight = isActive ? FontStyle.Bold : FontStyle.Normal,
                     unityTextAlign = TextAnchor.MiddleLeft,
@@ -171,7 +188,7 @@ namespace HonamiAnimationSystem.Editor.Timeline
                     flexShrink = 0,
                     unityTextAlign = TextAnchor.MiddleCenter,
                     fontSize = 13,
-                    color = TimelineTheme.MutedText,
+                    color = HonamiEditorTheme.MutedText,
                     borderTopLeftRadius = 3,
                     borderTopRightRadius = 3,
                     borderBottomLeftRadius = 3,
@@ -185,7 +202,7 @@ namespace HonamiAnimationSystem.Editor.Timeline
             });
             close.RegisterCallback<PointerLeaveEvent>(_ =>
             {
-                close.style.color = TimelineTheme.MutedText;
+                close.style.color = HonamiEditorTheme.MutedText;
                 close.style.backgroundColor = Color.clear;
             });
             close.RegisterCallback<PointerDownEvent>(evt =>
@@ -209,17 +226,17 @@ namespace HonamiAnimationSystem.Editor.Timeline
                     flexShrink = 0,
                     unityTextAlign = TextAnchor.MiddleCenter,
                     fontSize = 15,
-                    color = TimelineTheme.MutedText
+                    color = HonamiEditorTheme.MutedText
                 }
             };
             add.RegisterCallback<PointerEnterEvent>(_ =>
             {
-                add.style.color = TimelineTheme.Text;
-                add.style.backgroundColor = TimelineTheme.ToolbarButtonHot;
+                add.style.color = HonamiEditorTheme.Text;
+                add.style.backgroundColor = HonamiEditorTheme.ToolbarButtonHot;
             });
             add.RegisterCallback<PointerLeaveEvent>(_ =>
             {
-                add.style.color = TimelineTheme.MutedText;
+                add.style.color = HonamiEditorTheme.MutedText;
                 add.style.backgroundColor = Color.clear;
             });
             add.RegisterCallback<PointerDownEvent>(evt =>
@@ -229,27 +246,6 @@ namespace HonamiAnimationSystem.Editor.Timeline
                 evt.StopPropagation();
             });
             return add;
-        }
-
-        internal static string TabTitle(TimelineState state)
-        {
-            return state.Mode switch
-            {
-                TimelineMode.HonamiTimeline => state.ActiveTimeline != null ? state.ActiveTimeline.name : "Timeline",
-                TimelineMode.HonamiClipEdit => state.ActiveClip != null ? state.ActiveClip.name : "Clip",
-                _ => state.SelectedState?.stateName
-                     ?? (state.Controller != null ? state.Controller.name : "State")
-            };
-        }
-
-        private static Texture TabIcon(TimelineState state)
-        {
-            return state.Mode switch
-            {
-                TimelineMode.HonamiTimeline => HonamiEditorIcons.TimelineWhite,
-                TimelineMode.HonamiClipEdit => UnityEditor.EditorGUIUtility.IconContent("AnimationClip Icon").image,
-                _ => HonamiEditorIcons.Controller
-            };
         }
     }
 }

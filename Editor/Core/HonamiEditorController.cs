@@ -363,6 +363,68 @@ namespace HonamiAnimationSystem.Editor.Core
         }
         #endregion
 
+        #region Blend Tree Operations
+        public static void AddBlendMotion(HonamiBlendTreeNode node, AnimationClip clip)
+        {
+            Undo.RecordObject(node, "Add Blend Motion");
+            node.blendMotions ??= new List<HonamiBlendTreeMotion>();
+
+            float threshold = 0f;
+            if (node.blendMotions.Count > 0)
+            {
+                float max = float.MinValue;
+                foreach (var motion in node.blendMotions)
+                    if (motion.threshold > max) max = motion.threshold;
+                threshold = max + 1f;
+            }
+
+            node.blendMotions.Add(new HonamiBlendTreeMotion { clip = clip, threshold = threshold, speed = 1f });
+            EditorUtility.SetDirty(node);
+        }
+
+        public static void RemoveBlendMotion(HonamiBlendTreeNode node, int index)
+        {
+            if (node.blendMotions == null || index < 0 || index >= node.blendMotions.Count) return;
+            Undo.RecordObject(node, "Remove Blend Motion");
+            node.blendMotions.RemoveAt(index);
+            EditorUtility.SetDirty(node);
+        }
+
+        public static void DuplicateBlendMotion(HonamiBlendTreeNode node, int index)
+        {
+            if (node.blendMotions == null || index < 0 || index >= node.blendMotions.Count) return;
+            Undo.RecordObject(node, "Duplicate Blend Motion");
+            var source = node.blendMotions[index];
+            node.blendMotions.Insert(index + 1, new HonamiBlendTreeMotion
+            {
+                clip = source.clip,
+                threshold = source.threshold,
+                speed = source.speed,
+                mirror = source.mirror
+            });
+            EditorUtility.SetDirty(node);
+        }
+
+        public static void DistributeBlendThresholds(HonamiBlendTreeNode node)
+        {
+            if (node.blendMotions == null || node.blendMotions.Count == 0) return;
+            Undo.RecordObject(node, "Distribute Blend Thresholds");
+
+            int count = node.blendMotions.Count;
+            if (count == 1)
+            {
+                node.blendMotions[0].threshold = 0f;
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                    node.blendMotions[i].threshold = i / (float)(count - 1);
+            }
+
+            EditorUtility.SetDirty(node);
+        }
+        #endregion
+
         #region State Edit Operations
         public static void EditStateProps(HonamiState state, string name, bool loop, bool reversed, float speed)
         {

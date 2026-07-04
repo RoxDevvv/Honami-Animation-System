@@ -303,7 +303,7 @@ namespace HonamiAnimationSystem.Editor.Timeline
             weightsSpan.Clear();
             var sortedSpan = s.BlendCache.BlendSorted.AsSpan(0, motionsCount);
 
-            TimelineBlendTreeUtility.CalculateWeights(s.BlendNode.blendMotions, s.BlendPreviewValue, weightsSpan, sortedSpan);
+            HonamiBlendWeightUtility.CalculateWeights(s.BlendNode.blendMotions, s.BlendPreviewValue, weightsSpan, sortedSpan);
 
             var motions = s.BlendNode.blendMotions;
             GameObject sampleTarget = null;

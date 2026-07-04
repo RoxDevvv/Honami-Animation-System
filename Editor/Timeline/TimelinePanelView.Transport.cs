@@ -142,7 +142,7 @@ namespace HonamiAnimationSystem.Editor.Timeline
         {
             var root = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
 
-            _previewToggle = TimelineControls.ToolbarToggle("Preview", _state.PreviewEnabled, value =>
+            _previewToggle = HonamiToolbarControls.ToolbarToggle("Preview", _state.PreviewEnabled, value =>
             {
                 _state.PreviewEnabled = value;
                 if (_state.PreviewEnabled && !AnimationMode.InAnimationMode()) AnimationMode.StartAnimationMode();
@@ -156,7 +156,7 @@ namespace HonamiAnimationSystem.Editor.Timeline
             });
             root.Add(_previewToggle);
 
-            _recordButton = TimelineControls.IconButton("Animation.Record", "Record", () =>
+            _recordButton = HonamiToolbarControls.IconButton("Animation.Record", "Record", () =>
             {
                 _state.IsRecording = !_state.IsRecording;
                 if (_state.IsRecording)
@@ -168,13 +168,13 @@ namespace HonamiAnimationSystem.Editor.Timeline
             });
             root.Add(_recordButton);
 
-            root.Add(TimelineControls.IconButton("Animation.FirstKey", "Start", () =>
+            root.Add(HonamiToolbarControls.IconButton("Animation.FirstKey", "Start", () =>
             {
                 _state.PlayheadTime = 0f;
                 _rebuild();
             }));
 
-            _playButton = TimelineControls.IconButton("Animation.Play", "Play / Pause", () =>
+            _playButton = HonamiToolbarControls.IconButton("Animation.Play", "Play / Pause", () =>
             {
                 TimelineState.TogglePlayback(_state);
                 _rebuild();
@@ -182,13 +182,13 @@ namespace HonamiAnimationSystem.Editor.Timeline
             _playIcon = _playButton.Q<Image>();
             root.Add(_playButton);
 
-            root.Add(TimelineControls.IconButton("Animation.LastKey", "End", () =>
+            root.Add(HonamiToolbarControls.IconButton("Animation.LastKey", "End", () =>
             {
                 _state.PlayheadTime = _state.GetDuration();
                 _rebuild();
             }));
 
-            _loopToggle = TimelineControls.ToolbarToggle("Loop", _state.ForceLoop, value =>
+            _loopToggle = HonamiToolbarControls.ToolbarToggle("Loop", _state.ForceLoop, value =>
             {
                 _state.ForceLoop = value;
                 _state.SaveSettings();
@@ -214,7 +214,7 @@ namespace HonamiAnimationSystem.Editor.Timeline
             });
             root.Add(_zoomSlider);
 
-            var fitButton = TimelineControls.ToolbarButton("Fit", () =>
+            var fitButton = HonamiToolbarControls.ToolbarButton("Fit", () =>
             {
                 float available = ViewportWidth() - _state.TrackHeaderWidth - 110f;
                 _state.TimeScale = Mathf.Clamp(available / Mathf.Max(0.01f, _state.GetDuration()), 10f, 500f);

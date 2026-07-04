@@ -17,10 +17,10 @@ namespace HonamiAnimationSystem.Editor.Timeline
         public static readonly Color AccentSoft = HonamiEditorTheme.AccentSoft;
         public static readonly Color WindowBg = HonamiEditorTheme.WindowBg;
         public static readonly Color PanelBg = new(0.078f, 0.083f, 0.092f);
-        public static readonly Color ToolbarBg = new(0.086f, 0.09f, 0.098f);
-        public static readonly Color ToolbarButton = new(0.13f, 0.14f, 0.155f);
-        public static readonly Color ToolbarButtonHot = new(0.18f, 0.19f, 0.21f);
-        public static readonly Color ToolbarButtonPressed = new(0.08f, 0.085f, 0.095f);
+        public static readonly Color ToolbarBg = HonamiEditorTheme.ToolbarBg;
+        public static readonly Color ToolbarButton = HonamiEditorTheme.ToolbarButton;
+        public static readonly Color ToolbarButtonHot = HonamiEditorTheme.ToolbarButtonHot;
+        public static readonly Color ToolbarButtonPressed = HonamiEditorTheme.ToolbarButtonPressed;
         public static readonly Color RulerBg = new(0.105f, 0.112f, 0.124f);
         public static readonly Color HeaderBg = new(0.095f, 0.102f, 0.112f);
         public static readonly Color HeaderSelected = new(0.16f, 0.135f, 0.155f);

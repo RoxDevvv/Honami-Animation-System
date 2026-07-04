@@ -203,7 +203,7 @@ namespace HonamiAnimationSystem.Editor
             int mCount = node.blendMotions.Count;
             Span<float> weights = mCount <= 32 ? stackalloc float[mCount] : new float[mCount];
             Span<(float threshold, int index)> sorted = mCount <= 32 ? stackalloc (float, int)[mCount] : new (float, int)[mCount];
-            TimelineBlendTreeUtility.CalculateWeights(node.blendMotions, state.BlendPreviewValue, weights, sorted);
+            HonamiBlendWeightUtility.CalculateWeights(node.blendMotions, state.BlendPreviewValue, weights, sorted);
 
             for (int i = 0; i < mCount; i++)
             {

@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEditor.Animations;
 using System.Collections.Generic;
 using HonamiAnimationSystem.Runtime.Core;
+using UBlendTree = UnityEditor.Animations.BlendTree;
 
 namespace HonamiAnimationSystem.Editor
 {
@@ -229,7 +230,7 @@ namespace HonamiAnimationSystem.Editor
                     hState.node = animNode;
                     hState.loop = clip.isLooping;
                 }
-                else if (aState.motion is BlendTree blendTree)
+                else if (aState.motion is UBlendTree blendTree)
                 {
                     HonamiBlendTreeNode btNode = ScriptableObject.CreateInstance<HonamiBlendTreeNode>();
                     btNode.name = aState.name + "_Node";
@@ -266,7 +267,7 @@ namespace HonamiAnimationSystem.Editor
             }
         }
 
-        private void ExtractBlendTreeMotionsFlat(BlendTree tree, List<HonamiBlendTreeMotion> motions)
+        private void ExtractBlendTreeMotionsFlat(UBlendTree tree, List<HonamiBlendTreeMotion> motions)
         {
             foreach (var child in tree.children)
             {
@@ -278,7 +279,7 @@ namespace HonamiAnimationSystem.Editor
                     btm.speed = child.timeScale;
                     motions.Add(btm);
                 }
-                else if (child.motion is BlendTree nestedTree)
+                else if (child.motion is UBlendTree nestedTree)
                 {
                     ExtractBlendTreeMotionsFlat(nestedTree, motions);
                 }

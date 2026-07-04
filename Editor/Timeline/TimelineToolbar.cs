@@ -123,7 +123,7 @@ namespace HonamiAnimationSystem.Editor.Timeline
                 TimelineMode.HonamiClipEdit => "Honami Clip Edit",
                 _ => "Mode"
             };
-            var button = TimelineControls.ToolbarButton(modeName, () =>
+            var button = HonamiToolbarControls.ToolbarButton(modeName, () =>
             {
                 var menu = new GenericMenu();
                 menu.AddItem(new GUIContent("Honami State"), _state.Mode == TimelineMode.HonamiState, () =>
@@ -260,16 +260,16 @@ namespace HonamiAnimationSystem.Editor.Timeline
         private VisualElement ViewOptionsRoot()
         {
             var root = Row();
-            root.Add(TimelineControls.ToolbarToggle("Snap", _state.SnapEnabled, value => { _state.SnapEnabled = value; _state.SaveSettings(); _rebuild(); }));
-            root.Add(TimelineControls.ToolbarToggle("Frames", _state.ShowFrames, value => { _state.ShowFrames = value; _state.SaveSettings(); _rebuild(); }));
-            root.Add(TimelineControls.ToolbarToggle("Keys", _state.ShowKeyframes, value => { _state.ShowKeyframes = value; _state.SaveSettings(); _rebuild(); }));
+            root.Add(HonamiToolbarControls.ToolbarToggle("Snap", _state.SnapEnabled, value => { _state.SnapEnabled = value; _state.SaveSettings(); _rebuild(); }));
+            root.Add(HonamiToolbarControls.ToolbarToggle("Frames", _state.ShowFrames, value => { _state.ShowFrames = value; _state.SaveSettings(); _rebuild(); }));
+            root.Add(HonamiToolbarControls.ToolbarToggle("Keys", _state.ShowKeyframes, value => { _state.ShowKeyframes = value; _state.SaveSettings(); _rebuild(); }));
             return root;
         }
 
         private VisualElement PanelOptionsRoot()
         {
             var root = Row();
-            _propsToggle = TimelineControls.ToolbarToggle("Props", _state.ShowProperties, value =>
+            _propsToggle = HonamiToolbarControls.ToolbarToggle("Props", _state.ShowProperties, value =>
             {
                 _state.ShowProperties = value;
                 _state.SaveSettings();
@@ -386,82 +386,5 @@ namespace HonamiAnimationSystem.Editor.Timeline
         }
     }
 
-    internal static class TimelineControls
-    {
-        public static Button ToolbarButton(string text, Action onClick)
-        {
-            var button = new Button(onClick) { text = text };
-            StyleToolbarElement(button);
-            return button;
-        }
-
-        public static Button IconButton(string iconName, string fallback, Action onClick)
-        {
-            var button = ToolbarButton("", onClick);
-            button.tooltip = fallback;
-            button.style.paddingLeft = button.style.paddingRight = 0;
-            button.style.justifyContent = Justify.Center;
-            button.style.alignItems = Align.Center;
-
-            var icon = EditorGUIUtility.IconContent(iconName).image;
-            if (icon != null)
-            {
-                button.Add(new Image { image = icon, style = { width = 16, height = 16, flexShrink = 0 } });
-                button.style.width = 32;
-            }
-            else
-            {
-                button.text = fallback;
-                button.style.minWidth = 45;
-                button.style.paddingLeft = button.style.paddingRight = 7;
-            }
-            return button;
-        }
-
-        public static Toggle ToolbarToggle(string text, bool value, Action<bool> changed)
-        {
-            var toggle = new Toggle { text = text, value = value };
-            StyleToolbarElement(toggle);
-            toggle.RegisterValueChangedCallback(evt => changed(evt.newValue));
-            return toggle;
-        }
-
-        public static void StyleToolbarElement(VisualElement element)
-        {
-            element.style.height = 24;
-            element.style.marginLeft = 2;
-            element.style.marginRight = 2;
-            element.style.paddingLeft = 7;
-            element.style.paddingRight = 7;
-            element.style.backgroundColor = TimelineTheme.ToolbarButton;
-            element.style.borderTopWidth = element.style.borderRightWidth = element.style.borderBottomWidth = element.style.borderLeftWidth = 1;
-            element.style.borderTopColor = element.style.borderRightColor = element.style.borderBottomColor = element.style.borderLeftColor = TimelineTheme.SubtleLine;
-            element.style.borderTopLeftRadius = element.style.borderTopRightRadius = element.style.borderBottomLeftRadius = element.style.borderBottomRightRadius = 4;
-
-            element.RegisterCallback<PointerEnterEvent>(_ =>
-            {
-                if (!element.enabledSelf) return;
-                element.style.backgroundColor = TimelineTheme.ToolbarButtonHot;
-                element.style.borderTopColor = element.style.borderRightColor = element.style.borderBottomColor = element.style.borderLeftColor = TimelineTheme.AccentDim;
-            });
-            element.RegisterCallback<PointerLeaveEvent>(_ =>
-            {
-                element.style.backgroundColor = TimelineTheme.ToolbarButton;
-                element.style.borderTopColor = element.style.borderRightColor = element.style.borderBottomColor = element.style.borderLeftColor = TimelineTheme.SubtleLine;
-            });
-            element.RegisterCallback<PointerDownEvent>(_ =>
-            {
-                if (!element.enabledSelf) return;
-                element.style.backgroundColor = TimelineTheme.ToolbarButtonPressed;
-                element.style.borderTopColor = element.style.borderRightColor = element.style.borderBottomColor = element.style.borderLeftColor = TimelineTheme.Accent;
-            });
-            element.RegisterCallback<PointerUpEvent>(_ =>
-            {
-                if (!element.enabledSelf) return;
-                element.style.backgroundColor = TimelineTheme.ToolbarButtonHot;
-                element.style.borderTopColor = element.style.borderRightColor = element.style.borderBottomColor = element.style.borderLeftColor = TimelineTheme.AccentDim;
-            });
-        }
-    }
 }
 #endif

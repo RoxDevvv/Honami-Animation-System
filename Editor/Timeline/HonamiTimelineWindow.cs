@@ -19,7 +19,7 @@ namespace HonamiAnimationSystem.Editor.Timeline
 
         private HonamiNotificationPanel _notificationPanel;
         private TimelineToolbarView _toolbarView;
-        private TimelineTabBar _tabBar;
+        private HonamiTabBar _tabBar;
         private TimelinePanelView _panel;
         private bool _refreshQueued;
 
@@ -330,7 +330,13 @@ namespace HonamiAnimationSystem.Editor.Timeline
             rootVisualElement.style.backgroundColor = TimelineTheme.WindowBg;
             rootVisualElement.style.flexDirection = FlexDirection.Column;
 
-            _tabBar = new TimelineTabBar(() => _tabs, () => _activeIndex, SelectTab, CloseTab, AddTab);
+            _tabBar = new HonamiTabBar(
+                () => _tabs.Count, () => _activeIndex, SelectTab, CloseTab, AddTab,
+                i => TabTitle(_tabs[i]), i => TabIcon(_tabs[i]),
+                i => _tabs[i].PreviewEnabled, "Preview enabled — contributes to scene sampling")
+            {
+                ActiveTabColor = TimelineTheme.PanelBg
+            };
             rootVisualElement.Add(_tabBar);
 
             _toolbarView = new TimelineToolbarView(Active, RequestRefreshViews);
@@ -438,6 +444,27 @@ namespace HonamiAnimationSystem.Editor.Timeline
             }
 
             _activeIndex = Mathf.Clamp(data.activeIndex, 0, Mathf.Max(0, _tabs.Count - 1));
+        }
+
+        private static string TabTitle(TimelineState state)
+        {
+            return state.Mode switch
+            {
+                TimelineMode.HonamiTimeline => state.ActiveTimeline != null ? state.ActiveTimeline.name : "Timeline",
+                TimelineMode.HonamiClipEdit => state.ActiveClip != null ? state.ActiveClip.name : "Clip",
+                _ => state.SelectedState?.stateName
+                     ?? (state.Controller != null ? state.Controller.name : "State")
+            };
+        }
+
+        private static Texture TabIcon(TimelineState state)
+        {
+            return state.Mode switch
+            {
+                TimelineMode.HonamiTimeline => HonamiEditorIcons.TimelineWhite,
+                TimelineMode.HonamiClipEdit => EditorGUIUtility.IconContent("AnimationClip Icon").image,
+                _ => HonamiEditorIcons.Controller
+            };
         }
 
         private static string ToObjectId(UnityEngine.Object obj)
